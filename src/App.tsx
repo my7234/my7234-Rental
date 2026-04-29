@@ -118,7 +118,6 @@ import {
   signInWithEmailAndPassword,
   updateProfile
 } from 'firebase/auth';
-import { GoogleGenAI } from "@google/genai";
 import { 
   setDoc,
   doc,
@@ -646,7 +645,7 @@ function LocationSelector({ selectedCountry, selectedCity, onCountryChange, onCi
   );
 }
 
-function PropertyModal({ onClose, onSave, editingProperty, isModerating }: any) {
+function PropertyModal({ onClose, onSave, editingProperty }: any) {
   const [formData, setFormData] = useState({
     title: editingProperty?.title || '',
     type: (editingProperty?.type || 'Home') as PropertyType,
@@ -727,24 +726,7 @@ function PropertyModal({ onClose, onSave, editingProperty, isModerating }: any) 
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      {/* Moderation Overlay */}
-      <AnimatePresence>
-        {isModerating && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[110] bg-white/80 backdrop-blur-md flex flex-col items-center justify-center space-y-4"
-          >
-            <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-            <div className="text-center">
-              <p className="text-xl font-black uppercase italic tracking-tighter">AI Security Scan...</p>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Verifying content safety</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+      {/* Property Modal Content */}
       <motion.div 
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -886,7 +868,6 @@ export default function App() {
   // Admin logic
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
   const [adminStats, setAdminStats] = useState({ users: 0, posts: 0 });
-  const [isModerating, setIsModerating] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminCodeInput, setAdminCodeInput] = useState('');
   const [adminError, setAdminError] = useState('');
@@ -1077,44 +1058,6 @@ export default function App() {
   const handleSaveProperty = async (propData: any) => {
     if (!user) return;
     
-    // AI Moderation check
-    if (propData.imageUrls && propData.imageUrls.length > 0) {
-      setIsModerating(true);
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      
-      for (const imgData of propData.imageUrls) {
-        if (!imgData) continue;
-        try {
-          // Remove base64 prefix
-          const base64Str = imgData.split(',')[1];
-          const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: [
-              {
-                text: "Analyze this image for a property rental app. Is it sexually explicit, extremely violent, or containing gore? Answer only 'YES' if it is inappropriate or 'NO' if it is safe and appropriate."
-              },
-              {
-                inlineData: {
-                  data: base64Str,
-                  mimeType: "image/jpeg"
-                }
-              }
-            ]
-          });
-
-          if (response.text?.trim().toUpperCase() === 'YES') {
-            alert("SAFETY ALERT: This image violates our content policy (contains inappropriate material). Please upload a standard property photo.");
-            setIsModerating(false);
-            return;
-          }
-        } catch (err) {
-          console.error("Moderation AI error", err);
-          // Fallback: if AI fails, we allow but log
-        }
-      }
-      setIsModerating(false);
-    }
-
     if (editingProperty) {
       await propertyService.updateProperty(editingProperty.id, propData);
     } else {
@@ -1555,7 +1498,6 @@ export default function App() {
             onClose={() => {setIsAddModalOpen(false); setEditingProperty(null)}} 
             onSave={handleSaveProperty} 
             editingProperty={editingProperty} 
-            isModerating={isModerating}
           />
         )}
       </AnimatePresence>
