@@ -116,7 +116,15 @@ import {
   signInWithEmailAndPassword,
   updateProfile
 } from 'firebase/auth';
-import { auth } from './firebase';
+import { GoogleGenAI } from "@google/genai";
+import { 
+  setDoc,
+  doc,
+  collection, 
+  getCountFromServer,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { db, auth } from './firebase';
 import { Property, PropertyType } from './types';
 import { propertyService } from './services/propertyService';
 
@@ -343,11 +351,11 @@ function ImageGalleryModal({ images, activeIndex, onClose }: any) {
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-black/98"
     >
-      <button onClick={onClose} className="absolute top-10 right-10 p-4 text-white hover:bg-white/10 rounded-full z-20 transition-colors">
-        <X size={40} />
+      <button onClick={onClose} className="absolute top-4 right-4 md:top-10 md:right-10 p-4 text-white hover:bg-white/10 rounded-full z-20 transition-colors">
+        <X size={32} className="md:w-10 md:h-10" />
       </button>
       
-      <div className="w-full flex-1 flex items-center justify-center p-4 relative">
+      <div className="w-full flex-1 flex items-center justify-center p-4 relative group">
         <AnimatePresence mode="wait">
           <motion.img 
             key={current}
@@ -355,7 +363,7 @@ function ImageGalleryModal({ images, activeIndex, onClose }: any) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
             src={images[current]} 
-            className="max-w-full max-h-[80vh] object-contain shadow-[0_0_100px_rgba(255,255,255,0.05)] rounded-2xl"
+            className="max-w-full max-h-full sm:max-h-[80vh] object-contain shadow-[0_0_100px_rgba(255,255,255,0.05)] rounded-lg md:rounded-2xl"
             referrerPolicy="no-referrer"
           />
         </AnimatePresence>
@@ -364,26 +372,26 @@ function ImageGalleryModal({ images, activeIndex, onClose }: any) {
           <>
             <button 
               onClick={() => setCurrent((prev: number) => (prev > 0 ? prev - 1 : images.length - 1))}
-              className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 p-6 text-white hover:bg-white/10 rounded-full transition-all group"
+              className="absolute left-2 md:left-10 top-1/2 -translate-y-1/2 p-4 md:p-6 text-white hover:bg-white/10 rounded-full transition-all group/btn"
             >
-              <ChevronLeft size={60} className="stroke-[3] group-hover:scale-110 transition-transform" />
+              <ChevronLeft size={40} className="md:w-[60px] md:h-[60px] stroke-[3] group-hover/btn:scale-110 transition-transform" />
             </button>
             <button 
               onClick={() => setCurrent((prev: number) => (prev < images.length - 1 ? prev + 1 : 0))}
-              className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 p-6 text-white hover:bg-white/10 rounded-full transition-all group"
+              className="absolute right-2 md:right-10 top-1/2 -translate-y-1/2 p-4 md:p-6 text-white hover:bg-white/10 rounded-full transition-all group/btn"
             >
-              <ChevronRight size={60} className="stroke-[3] group-hover:scale-110 transition-transform" />
+              <ChevronRight size={40} className="md:w-[60px] md:h-[60px] stroke-[3] group-hover/btn:scale-110 transition-transform" />
             </button>
           </>
         )}
       </div>
 
-      <div className="w-full bg-black/40 backdrop-blur-xl p-8 flex items-center justify-center gap-4 overflow-x-auto">
+      <div className="w-full bg-black/40 backdrop-blur-xl p-4 md:p-8 flex items-center justify-center gap-2 md:gap-4 overflow-x-auto no-scrollbar">
         {images.map((img: string, i: number) => (
           <button 
             key={i} 
             onClick={() => setCurrent(i)}
-            className={`flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all duration-300 ${current === i ? 'border-yellow-400 scale-110 shadow-2xl shadow-yellow-400/20' : 'border-transparent opacity-40 hover:opacity-100'}`}
+            className={`flex-shrink-0 w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl overflow-hidden border-2 md:border-4 transition-all duration-300 ${current === i ? 'border-yellow-400 scale-110 shadow-2xl shadow-yellow-400/20' : 'border-transparent opacity-40 hover:opacity-100'}`}
           >
             <img src={img} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           </button>
@@ -472,7 +480,7 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onTo
         <div className="space-y-4">
           <div className="space-y-1">
              <span className="text-sm font-black text-[#8B4513] uppercase tracking-[0.2em]">{p.area}</span>
-             <h4 className="text-5xl font-black tracking-tighter text-green-600 leading-none group-hover:text-green-700 transition-colors uppercase">{p.city}</h4>
+             <h4 className="text-3xl md:text-5xl font-black tracking-tighter text-green-600 leading-none group-hover:text-green-700 transition-colors uppercase">{p.city}</h4>
           </div>
           
           <div className="space-y-1 pt-2 border-t border-gray-50">
@@ -579,7 +587,7 @@ function LocationSelector({ selectedCountry, selectedCity, onCountryChange, onCi
   );
 }
 
-function PropertyModal({ onClose, onSave, editingProperty }: any) {
+function PropertyModal({ onClose, onSave, editingProperty, isModerating }: any) {
   const [formData, setFormData] = useState({
     title: editingProperty?.title || '',
     type: (editingProperty?.type || 'Home') as PropertyType,
@@ -659,6 +667,25 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      
+      {/* Moderation Overlay */}
+      <AnimatePresence>
+        {isModerating && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[110] bg-white/80 backdrop-blur-md flex flex-col items-center justify-center space-y-4"
+          >
+            <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+            <div className="text-center">
+              <p className="text-xl font-black uppercase italic tracking-tighter">AI Moderation...</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Checking image safety</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div 
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -762,17 +789,6 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
                  </label>
                </div>
             </div>
-            <div className="space-y-4">
-               <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Listing Status</p>
-               <div className="flex gap-4">
-                 <label className="flex items-center gap-2 cursor-pointer">
-                   <input type="checkbox" checked={formData.isAvailable} onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})} className="w-5 h-5 text-green-500 border-gray-300 rounded" />
-                   <span className={`text-sm font-black uppercase ${formData.isAvailable ? 'text-green-600' : 'text-red-500'}`}>
-                     {formData.isAvailable ? 'Available' : 'Booked'}
-                   </span>
-                 </label>
-               </div>
-            </div>
           </div>
 
           <div className="space-y-4">
@@ -781,20 +797,6 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
                 <Input label="Phone" required value={formData.phone} onChange={(e: any) => setFormData({...formData, phone: e.target.value})} />
                 <Input label="WhatsApp" required value={formData.whatsapp} onChange={(e: any) => setFormData({...formData, whatsapp: e.target.value})} />
              </div>
-          </div>
-
-          <div className="space-y-4">
-            <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Images</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div className="w-full h-40 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => (document.getElementById('image-upload') as any)?.click()}>
-                  <Plus size={32} className="text-gray-300" />
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Select Property Image</p>
-                  <input type="file" id="image-upload" className="hidden" accept="image/*" />
-               </div>
-               <div className="bg-gray-50 rounded-2xl p-4 flex items-center justify-center text-center">
-                  <p className="text-[10px] text-gray-400 font-medium">Multiple images support coming soon. Currently only the primary image is featured on listing cards.</p>
-               </div>
-            </div>
           </div>
 
           <div className="sticky bottom-0 bg-white pt-4 pb-6 border-t border-gray-50 flex gap-4">
@@ -823,14 +825,31 @@ export default function App() {
 
   // Admin logic
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+  const [adminStats, setAdminStats] = useState({ users: 0, posts: 0 });
+  const [isModerating, setIsModerating] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminCodeInput, setAdminCodeInput] = useState('');
   const [adminError, setAdminError] = useState('');
 
-  const handleAdminVerify = () => {
+  const handleAdminVerify = async () => {
     if (adminCodeInput === 'Fast723424') {
       setIsAdminAuthenticated(true);
       setAdminError('');
+      // Fetch stats
+      try {
+        const usersColl = collection(db, 'users');
+        const propertiesColl = collection(db, 'properties');
+        const [userSnap, propSnap] = await Promise.all([
+          getCountFromServer(usersColl),
+          getCountFromServer(propertiesColl)
+        ]);
+        setAdminStats({
+          users: userSnap.data().count,
+          posts: propSnap.data().count
+        });
+      } catch (err) {
+        console.error("Stats fetch failed", err);
+      }
     } else {
       setAdminError('Ghalat Code! Dobara koshish karein.');
     }
@@ -947,17 +966,30 @@ export default function App() {
 
   const handleLogin = async (credentials?: any) => {
     try {
+      let userRes;
       if (credentials) {
         if (credentials.type === 'register') {
-          const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
-          await updateProfile(userCredential.user, { displayName: credentials.fullName });
+          userRes = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
+          await updateProfile(userRes.user, { displayName: credentials.fullName });
         } else {
-          await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+          userRes = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
         }
       } else {
         const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
+        userRes = await signInWithPopup(auth, provider);
       }
+
+      // Save user to Firestore for counts
+      if (userRes?.user) {
+        await setDoc(doc(db, 'users', userRes.user.uid), {
+          uid: userRes.user.uid,
+          email: userRes.user.email,
+          displayName: userRes.user.displayName,
+          photoURL: userRes.user.photoURL,
+          lastLogin: serverTimestamp()
+        }, { merge: true });
+      }
+
       setIsLoginModalOpen(false);
     } catch (error: any) {
       console.error("Login failed", error);
@@ -984,6 +1016,44 @@ export default function App() {
 
   const handleSaveProperty = async (propData: any) => {
     if (!user) return;
+    
+    // AI Moderation check
+    if (propData.imageUrls && propData.imageUrls.length > 0) {
+      setIsModerating(true);
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      
+      for (const imgData of propData.imageUrls) {
+        if (!imgData) continue;
+        try {
+          // Remove base64 prefix
+          const base64Str = imgData.split(',')[1];
+          const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: [
+              {
+                text: "Analyze this image for a property rental app. Is it sexually explicit, extremely violent, or containing gore? Answer only 'YES' if it is inappropriate or 'NO' if it is safe and appropriate."
+              },
+              {
+                inlineData: {
+                  data: base64Str,
+                  mimeType: "image/jpeg"
+                }
+              }
+            ]
+          });
+
+          if (response.text?.trim().toUpperCase() === 'YES') {
+            alert("MAZIRAT: Ye image policy ke khilaf hai (Inappropriate Content). Meharbani karke koi dusri image upload karein.");
+            setIsModerating(false);
+            return;
+          }
+        } catch (err) {
+          console.error("Moderation AI error", err);
+          // Fallback: if AI fails, we allow but log
+        }
+      }
+      setIsModerating(false);
+    }
 
     if (editingProperty) {
       await propertyService.updateProperty(editingProperty.id, propData);
@@ -1060,23 +1130,23 @@ export default function App() {
         );
       case 'about':
         return (
-          <div className="max-w-4xl mx-auto py-12 px-6 text-center space-y-12">
-            <div className="bg-yellow-400 p-12 rounded-[3.5rem] shadow-2xl">
-              <h1 className="text-6xl font-black italic uppercase tracking-tighter mb-4">RENTAL HUB</h1>
-              <p className="text-xl font-bold opacity-80 uppercase tracking-widest">Global Property Solutions</p>
+          <div className="max-w-4xl mx-auto py-12 px-4 md:px-6 text-center space-y-12">
+            <div className="bg-yellow-400 p-8 md:p-12 rounded-[2rem] md:rounded-[3.5rem] shadow-2xl">
+              <h1 className="text-4xl md:text-6xl font-black italic uppercase tracking-tighter mb-4">RENTAL HUB</h1>
+              <p className="text-lg md:text-xl font-bold opacity-80 uppercase tracking-widest">Global Property Solutions</p>
             </div>
-            <div className="space-y-8 text-lg font-medium text-gray-600">
+            <div className="space-y-8 text-base md:text-lg font-medium text-gray-600">
               <p>RENTAL HUB is a premier digital marketplace designed to simplify property renting and listing. Whether you are searching for a cozy apartment, a spacious house, or a commercial shop, we bring everything to your fingertips.</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+                <div className="p-6 bg-gray-50 rounded-[2rem] border border-gray-100">
                   <p className="text-4xl mb-2">🏠</p>
                   <p className="font-black uppercase text-xs">Easy Listing</p>
                 </div>
-                <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                <div className="p-6 bg-gray-50 rounded-[2rem] border border-gray-100">
                   <p className="text-4xl mb-2">📍</p>
                   <p className="font-black uppercase text-xs">Global Search</p>
                 </div>
-                <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                <div className="p-6 bg-gray-50 rounded-[2rem] border border-gray-100">
                   <p className="text-4xl mb-2">💬</p>
                   <p className="font-black uppercase text-xs">Direct Contact</p>
                 </div>
@@ -1147,7 +1217,7 @@ export default function App() {
           <div className="space-y-8 animate-in fade-in duration-500">
              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                   <h1 className="text-4xl font-black tracking-tighter">{t.rentDreamHome}</h1>
+                   <h1 className="text-3xl md:text-4xl font-black tracking-tighter">{t.rentDreamHome}</h1>
                    <p className="text-gray-500 font-medium">{t.browseDesc}</p>
                 </div>
                 <Button onClick={() => requireAuth(() => setIsAddModalOpen(true))} className="px-8 py-4 shadow-xl shadow-yellow-400/30">
@@ -1250,7 +1320,7 @@ export default function App() {
               initial={{x:'-100%'}} 
               animate={{x:0}} 
               exit={{x:'-100%'}} 
-              transition={{type:'spring', damping:30, stiffness:300}} 
+              transition={{type:'spring', damping:35, stiffness:400}} 
               className="fixed inset-y-0 left-0 w-80 bg-white z-[60] shadow-2xl flex flex-col p-6"
             >
                <div className="flex items-center justify-between mb-8">
@@ -1304,7 +1374,7 @@ export default function App() {
           <span className="font-black tracking-tighter text-2xl italic uppercase underline decoration-yellow-400 underline-offset-4">Rental Hub</span>
         </div>
         
-        <p className="text-gray-400 text-xs font-black uppercase tracking-[0.2em] text-center md:text-right">
+        <p className="text-gray-400 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-center md:text-right">
           © <span 
             onClick={() => setIsAdminPanelOpen(true)} 
             className="cursor-help hover:text-yellow-500 transition-colors"
@@ -1320,7 +1390,7 @@ export default function App() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative bg-white p-8 md:p-12 rounded-[3.5rem] shadow-2xl max-w-lg w-full text-center space-y-8"
+              className="relative bg-white p-6 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl max-w-lg w-full text-center space-y-8 overflow-y-auto max-h-[90vh]"
             >
               <button onClick={() => setIsAdminPanelOpen(false)} className="absolute top-8 right-8 p-2 hover:bg-gray-100 rounded-full">
                 <X size={24} />
@@ -1356,8 +1426,19 @@ export default function App() {
                     <h2 className="text-3xl font-black tracking-tighter uppercase italic">Admin Control</h2>
                     <p className="text-gray-400 text-sm font-bold mt-2">Tamam listings ka control yahan hai.</p>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 flex flex-col items-center gap-2">
+                      <span className="text-3xl font-black text-yellow-500">{adminStats.posts || properties.length}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Posts</span>
+                    </div>
+                    <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 flex flex-col items-center gap-2">
+                      <span className="text-3xl font-black text-yellow-500">{adminStats.users}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Real Users</span>
+                    </div>
+                  </div>
                   
-                  <div className="max-h-[40vh] overflow-y-auto space-y-2 text-left">
+                  <div className="max-h-[40vh] overflow-y-auto space-y-2 text-left pr-2 custom-scrollbar">
                     {properties.map(p => (
                       <div key={p.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
                         <div className="flex items-center gap-3">
@@ -1394,7 +1475,14 @@ export default function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {isAddModalOpen && <PropertyModal onClose={() => {setIsAddModalOpen(false); setEditingProperty(null)}} onSave={handleSaveProperty} editingProperty={editingProperty} />}
+        {isAddModalOpen && (
+          <PropertyModal 
+            onClose={() => {setIsAddModalOpen(false); setEditingProperty(null)}} 
+            onSave={handleSaveProperty} 
+            editingProperty={editingProperty} 
+            isModerating={isModerating}
+          />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>

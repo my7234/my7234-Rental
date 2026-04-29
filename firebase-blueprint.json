@@ -27,12 +27,29 @@
         "ownerUid": { "type": "string" }
       },
       "required": ["title", "type", "stories", "rooms", "bathrooms", "country", "city", "area", "address", "phone", "whatsapp", "currency", "language", "ownerUid"]
+    },
+    "User": {
+      "title": "User",
+      "description": "App user profile for stats and identification",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "lastLogin": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
     }
   },
   "firestore": {
     "/properties/{propertyId}": {
       "schema": "Property",
       "description": "Collection of all rental properties"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Collection of registered users"
     }
   }
 }
