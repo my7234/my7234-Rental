@@ -22,8 +22,88 @@ import {
   CheckCircle2,
   XCircle,
   Navigation,
-  Lock
+  Lock,
+  Globe,
+  Moon,
+  Sun,
+  Bell,
+  DollarSign,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+
+const translations: any = {
+  en: {
+    home: 'Home',
+    add: 'Add',
+    profile: 'Profile',
+    privacy: 'Privacy',
+    about: 'About',
+    settings: 'Settings',
+    search: 'Search properties...',
+    available: 'Available',
+    booked: 'Booked',
+    taken: 'TAKEN',
+    menu: 'Menu',
+    logout: 'Logout',
+    contact: 'Contact',
+    amenities: 'Amenities',
+    status: 'Listing Status',
+    markBooked: 'Mark as Booked',
+    markAvailable: 'Mark as Available',
+    edit: 'Edit',
+    delete: 'Delete',
+    pkr: 'PKR',
+    usd: 'USD',
+    darkMode: 'Dark Mode',
+    notifications: 'Notifications',
+    language: 'Language',
+    currency: 'Currency',
+    all: 'All',
+    homes: 'Homes',
+    apartments: 'Apartments',
+    shops: 'Shops',
+    rentDreamHome: 'Rent Your Dream Home',
+    browseDesc: 'Browse thousands of shops, apartments and homes.',
+    addProperty: 'Add Property',
+    searchPlaceholder: 'Search anything...'
+  },
+  ur: {
+    home: 'ہوم',
+    add: 'شامل کریں',
+    profile: 'پروفائل',
+    privacy: 'پرائیویسی',
+    about: 'بارے میں',
+    settings: 'سیٹنگز',
+    search: 'پراپرٹی تلاش کریں...',
+    available: 'خالی ہے',
+    booked: 'بُک ہو چکا',
+    taken: 'لے لیا گیا ہے',
+    menu: 'مینیو',
+    logout: 'لاگ آؤٹ',
+    contact: 'رابطہ',
+    amenities: 'سہولیات',
+    status: 'سٹیٹس',
+    markBooked: 'بُک کریں',
+    markAvailable: 'خالی کریں',
+    edit: 'ایڈٹ',
+    delete: 'ختم کریں',
+    pkr: 'روپیہ',
+    usd: 'ڈالر',
+    darkMode: 'ڈارک موڈ',
+    notifications: 'اطلاعات',
+    language: 'زبان',
+    currency: 'کرنسی',
+    all: 'تمام',
+    homes: 'گھر',
+    apartments: 'اپارٹمنٹ',
+    shops: 'دکان',
+    rentDreamHome: 'اپنا خوابوں کا گھر کرایہ پر لیں',
+    browseDesc: 'ہزاروں دکانیں، اپارٹمنٹس اور گھر دیکھیں۔',
+    addProperty: 'پراپرٹی شامل کریں',
+    searchPlaceholder: 'کچھ بھی تلاش کریں...'
+  }
+};
 import { motion, AnimatePresence } from 'motion/react';
 import { Country, City } from 'country-state-city';
 import { 
@@ -178,7 +258,7 @@ const Select = ({ label, children, ...props }: any) => (
 
 // --- Pages ---
 
-function ProfilePage({ properties, onEdit, onDelete, user, onLogout }: any) {
+function ProfilePage({ properties, onEdit, onDelete, user, onLogout, onToggleAvailability, t, onImageOpen }: any) {
   return (
     <div className="space-y-8 pb-20">
       <div className="bg-yellow-400 p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
@@ -226,6 +306,9 @@ function ProfilePage({ properties, onEdit, onDelete, user, onLogout }: any) {
                 isProfile 
                 onEdit={() => onEdit(p)} 
                 onDelete={() => onDelete(p.id)} 
+                onToggleAvailability={onToggleAvailability}
+                t={t}
+                onImageOpen={onImageOpen}
               />
             ))}
           </div>
@@ -250,9 +333,69 @@ function StaticPage({ title, content }: any) {
   );
 }
 
+function ImageGalleryModal({ images, activeIndex, onClose }: any) {
+  const [current, setCurrent] = useState(activeIndex);
+  
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-black/98"
+    >
+      <button onClick={onClose} className="absolute top-10 right-10 p-4 text-white hover:bg-white/10 rounded-full z-20 transition-colors">
+        <X size={40} />
+      </button>
+      
+      <div className="w-full flex-1 flex items-center justify-center p-4 relative">
+        <AnimatePresence mode="wait">
+          <motion.img 
+            key={current}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            src={images[current]} 
+            className="max-w-full max-h-[80vh] object-contain shadow-[0_0_100px_rgba(255,255,255,0.05)] rounded-2xl"
+            referrerPolicy="no-referrer"
+          />
+        </AnimatePresence>
+
+        {images.length > 1 && (
+          <>
+            <button 
+              onClick={() => setCurrent((prev: number) => (prev > 0 ? prev - 1 : images.length - 1))}
+              className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 p-6 text-white hover:bg-white/10 rounded-full transition-all group"
+            >
+              <ChevronLeft size={60} className="stroke-[3] group-hover:scale-110 transition-transform" />
+            </button>
+            <button 
+              onClick={() => setCurrent((prev: number) => (prev < images.length - 1 ? prev + 1 : 0))}
+              className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 p-6 text-white hover:bg-white/10 rounded-full transition-all group"
+            >
+              <ChevronRight size={60} className="stroke-[3] group-hover:scale-110 transition-transform" />
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="w-full bg-black/40 backdrop-blur-xl p-8 flex items-center justify-center gap-4 overflow-x-auto">
+        {images.map((img: string, i: number) => (
+          <button 
+            key={i} 
+            onClick={() => setCurrent(i)}
+            className={`flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all duration-300 ${current === i ? 'border-yellow-400 scale-110 shadow-2xl shadow-yellow-400/20' : 'border-transparent opacity-40 hover:opacity-100'}`}
+          >
+            <img src={img} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 // --- Cards & Modals ---
 
-function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction }: any) {
+function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onToggleAvailability, t, onImageOpen }: any) {
   const [currentImg, setCurrentImg] = useState(0);
   const images = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls : [p.imageUrl || 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&q=80&w=800'];
 
@@ -267,20 +410,34 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction }: an
   return (
     <motion.div 
       whileHover={{ y: -5 }}
-      className="group bg-white rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col relative"
+      className="group bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col relative"
     >
-      <div className="relative h-72 overflow-hidden">
+      <div 
+        className="relative h-72 overflow-hidden cursor-zoom-in"
+        onClick={() => onImageOpen && onImageOpen(images, currentImg)}
+      >
         <img 
           src={images[currentImg]} 
           alt={p.title} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute top-6 left-6">
+        <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
           <span className="px-5 py-2 bg-yellow-400 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl">
             {p.type}
           </span>
+          <span className={`px-5 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl ${p.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}>
+            {p.isAvailable ? t.available : t.booked}
+          </span>
         </div>
+
+        {p.isAvailable === false && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[2px] z-[5]">
+            <div className="bg-red-600 text-white px-8 py-4 rounded-[2rem] font-black text-2xl uppercase tracking-tighter shadow-2xl rotate-[-10deg]">
+              {t.taken}
+            </div>
+          </div>
+        )}
 
         {images.length > 1 && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
@@ -361,13 +518,23 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction }: an
               </a>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={onEdit} variant="outline" className="w-full py-3 text-xs font-black uppercase tracking-widest">
-                <Edit3 size={14} /> Edit
+            <div className="space-y-3">
+              <Button 
+                onClick={() => onToggleAvailability(p.id, !p.isAvailable)} 
+                variant={p.isAvailable ? "secondary" : "primary"}
+                className={`w-full py-3 text-xs font-black uppercase tracking-widest ${p.isAvailable ? 'bg-red-50 text-red-600 border-red-200' : 'bg-green-400 text-black'}`}
+              >
+                {p.isAvailable ? <XCircle size={14} /> : <CheckCircle2 size={14} />}
+                {p.isAvailable ? t.markBooked : t.markAvailable}
               </Button>
-              <Button onClick={onDelete} variant="danger" className="w-full py-3 text-xs font-black uppercase tracking-widest">
-                <Trash2 size={14} /> Delete
-              </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <Button onClick={onEdit} variant="outline" className="w-full py-3 text-xs font-black uppercase tracking-widest">
+                  <Edit3 size={14} /> {t.edit}
+                </Button>
+                <Button onClick={onDelete} variant="danger" className="w-full py-3 text-xs font-black uppercase tracking-widest">
+                  <Trash2 size={14} /> {t.delete}
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -430,6 +597,7 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
     currency: editingProperty?.currency || '',
     language: editingProperty?.language || '',
     imageUrls: editingProperty?.imageUrls || [] as string[],
+    isAvailable: editingProperty?.isAvailable ?? true,
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -584,12 +752,35 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
                </div>
             </div>
             <div className="space-y-4">
-               <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Contact</p>
-               <div className="space-y-4">
-                  <Input label="Phone" required value={formData.phone} onChange={(e: any) => setFormData({...formData, phone: e.target.value})} />
-                  <Input label="WhatsApp" required value={formData.whatsapp} onChange={(e: any) => setFormData({...formData, whatsapp: e.target.value})} />
+               <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Listing Status</p>
+               <div className="flex gap-4">
+                 <label className="flex items-center gap-2 cursor-pointer">
+                   <input type="checkbox" checked={formData.isAvailable} onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})} className="w-5 h-5 text-green-500 border-gray-300 rounded" />
+                   <span className={`text-sm font-black uppercase ${formData.isAvailable ? 'text-green-600' : 'text-red-500'}`}>
+                     {formData.isAvailable ? 'Available' : 'Booked'}
+                   </span>
+                 </label>
                </div>
             </div>
+            <div className="space-y-4">
+               <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Listing Status</p>
+               <div className="flex gap-4">
+                 <label className="flex items-center gap-2 cursor-pointer">
+                   <input type="checkbox" checked={formData.isAvailable} onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})} className="w-5 h-5 text-green-500 border-gray-300 rounded" />
+                   <span className={`text-sm font-black uppercase ${formData.isAvailable ? 'text-green-600' : 'text-red-500'}`}>
+                     {formData.isAvailable ? 'Available' : 'Booked'}
+                   </span>
+                 </label>
+               </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+             <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Contact</p>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Input label="Phone" required value={formData.phone} onChange={(e: any) => setFormData({...formData, phone: e.target.value})} />
+                <Input label="WhatsApp" required value={formData.whatsapp} onChange={(e: any) => setFormData({...formData, whatsapp: e.target.value})} />
+             </div>
           </div>
 
           <div className="space-y-4">
@@ -628,6 +819,7 @@ export default function App() {
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeGallery, setActiveGallery] = useState<{images: string[], index: number} | null>(null);
 
   // Admin logic
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
@@ -646,6 +838,21 @@ export default function App() {
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [lang, setLang] = useState<'en' | 'ur'>('en');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
+  const [currency, setCurrency] = useState('PKR');
+
+  const t = translations[lang];
+
+  useEffect(() => {
+    // Sync Dark Mode with body class
+    if (isDarkMode) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
@@ -768,11 +975,11 @@ export default function App() {
   };
 
   const navItems = [
-    { id: 'home', icon: Home, label: 'Home Page' },
-    { id: 'profile', icon: User, label: 'Profile Page', protected: true },
-    { id: 'privacy', icon: Shield, label: 'Privacy Policy' },
-    { id: 'about', icon: Info, label: 'About Us' },
-    { id: 'settings', icon: Settings, label: 'Settings' },
+    { id: 'home', icon: Home, label: t.home },
+    { id: 'profile', icon: User, label: t.profile, protected: true },
+    { id: 'privacy', icon: Shield, label: t.privacy },
+    { id: 'about', icon: Info, label: t.about },
+    { id: 'settings', icon: Settings, label: t.settings },
   ];
 
   const handleSaveProperty = async (propData: any) => {
@@ -785,7 +992,8 @@ export default function App() {
         ...propData,
         ownerEmail: user.email || '',
         ownerUid: user.uid,
-        imageUrl: `https://picsum.photos/seed/${Math.random()}/800/600`
+        isAvailable: propData.isAvailable ?? true,
+        imageUrls: propData.imageUrls?.length > 0 ? propData.imageUrls : [`https://picsum.photos/seed/${Math.random()}/800/600`]
       });
     }
     setIsAddModalOpen(false);
@@ -797,6 +1005,10 @@ export default function App() {
       await propertyService.deleteProperty(deleteId);
       setDeleteId(null);
     }
+  };
+
+  const handleToggleAvailability = async (id: string, isAvailable: boolean) => {
+    await propertyService.updateProperty(id, { isAvailable });
   };
 
   if (isLoading) {
@@ -817,24 +1029,129 @@ export default function App() {
             onDelete={setDeleteId} 
             user={user} 
             onLogout={handleLogout}
+            onToggleAvailability={handleToggleAvailability}
+            t={t}
+            onImageOpen={(images: string[], index: number) => setActiveGallery({ images, index })}
           />
         ) : null;
       case 'privacy':
-        return <StaticPage title="Privacy Policy" content="Your data is stored locally in your browser for privacy." />;
+        return (
+          <div className="max-w-4xl mx-auto py-12 px-6">
+            <h1 className="text-4xl font-black mb-8 italic uppercase tracking-tighter">Privacy Policy</h1>
+            <div className="space-y-6 text-gray-600 leading-relaxed font-medium">
+              <section>
+                <h2 className="text-xl font-black text-black uppercase mb-2">1. Data Collection</h2>
+                <p>We collect minimal data required for property listing: your email, name (via Google Auth), and contact details provided in listings. This app adheres to international data protection standards and Pakistani digital privacy norms.</p>
+              </section>
+              <section>
+                <h2 className="text-xl font-black text-black uppercase mb-2">2. Local & Global Compliance</h2>
+                <p>Your data is processed securely via Google Firebase. We do not sell your personal information to third parties. For international users, we respect standard data rights regarding access and deletion.</p>
+              </section>
+              <section>
+                <h2 className="text-xl font-black text-black uppercase mb-2">3. Property Content</h2>
+                <p>Users are responsible for the accuracy of their listings. RENTAL HUB acts as a platform to connect owners and tenants.</p>
+              </section>
+              <section>
+                <h2 className="text-xl font-black text-black uppercase mb-2">4. Support</h2>
+                <p>For any privacy concerns or data removal requests, contact us at <span className="text-black font-bold">pkr723424@gmail.com</span>.</p>
+              </section>
+            </div>
+          </div>
+        );
       case 'about':
-        return <StaticPage title="About Us" content="RENTAL HUB is your premium destination for renting and listing properties globally." />;
+        return (
+          <div className="max-w-4xl mx-auto py-12 px-6 text-center space-y-12">
+            <div className="bg-yellow-400 p-12 rounded-[3.5rem] shadow-2xl">
+              <h1 className="text-6xl font-black italic uppercase tracking-tighter mb-4">RENTAL HUB</h1>
+              <p className="text-xl font-bold opacity-80 uppercase tracking-widest">Global Property Solutions</p>
+            </div>
+            <div className="space-y-8 text-lg font-medium text-gray-600">
+              <p>RENTAL HUB is a premier digital marketplace designed to simplify property renting and listing. Whether you are searching for a cozy apartment, a spacious house, or a commercial shop, we bring everything to your fingertips.</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                  <p className="text-4xl mb-2">🏠</p>
+                  <p className="font-black uppercase text-xs">Easy Listing</p>
+                </div>
+                <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                  <p className="text-4xl mb-2">📍</p>
+                  <p className="font-black uppercase text-xs">Global Search</p>
+                </div>
+                <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                  <p className="text-4xl mb-2">💬</p>
+                  <p className="font-black uppercase text-xs">Direct Contact</p>
+                </div>
+              </div>
+              <p>Contact us for partnerships: <span className="text-black font-black">pkr723424@gmail.com</span></p>
+            </div>
+          </div>
+        );
       case 'settings':
-        return <StaticPage title="Settings" content="Customize your experience with future updates." />;
+        return (
+          <div className="max-w-4xl mx-auto py-12 px-6">
+            <h1 className="text-4xl font-black mb-8 italic uppercase tracking-tighter">{t.settings}</h1>
+            <div className="space-y-4">
+              {[
+                { 
+                  label: t.darkMode, 
+                  desc: 'Siyah/Dark theme enable karein', 
+                  value: isDarkMode ? 'Enabled' : 'Disabled', 
+                  icon: <Moon size={20} />,
+                  action: () => setIsDarkMode(!isDarkMode)
+                },
+                { 
+                  label: t.notifications, 
+                  desc: 'Naye listings ke alerts', 
+                  value: isNotificationsEnabled ? 'Enabled' : 'Disabled', 
+                  icon: <Bell size={20} />,
+                  action: () => setIsNotificationsEnabled(!isNotificationsEnabled)
+                },
+                { 
+                  label: t.language, 
+                  desc: 'App ki zaban tabdeel karein', 
+                  value: lang === 'en' ? 'English' : 'اردو', 
+                  icon: <Globe size={20} />,
+                  action: () => setLang(lang === 'en' ? 'ur' : 'en')
+                },
+                { 
+                  label: t.currency, 
+                  desc: 'Default price format', 
+                  value: currency, 
+                  icon: <DollarSign size={20} />,
+                  action: () => setCurrency(currency === 'PKR' ? 'USD' : 'PKR')
+                },
+              ].map((s, i) => (
+                <div 
+                  key={i} 
+                  onClick={s.action}
+                  className="flex items-center justify-between p-8 bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 hover:border-yellow-400 transition-all cursor-pointer group shadow-sm active:scale-[0.98]"
+                >
+                  <div className="flex items-center gap-6">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-500 group-hover:text-yellow-500 transition-colors">
+                      {s.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black uppercase text-black dark:text-white">{s.label}</h3>
+                      <p className="text-gray-400 font-bold text-sm tracking-tight">{s.desc}</p>
+                    </div>
+                  </div>
+                  <span className={`px-6 py-2 rounded-full text-xs font-black uppercase border transition-colors ${s.value.includes('Enabled') || s.value === 'English' || s.value === 'PKR' ? 'bg-yellow-400 border-yellow-400 text-black' : 'bg-white text-black border-gray-100'}`}>
+                    {s.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
       default:
         return (
           <div className="space-y-8 animate-in fade-in duration-500">
              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                   <h1 className="text-4xl font-black tracking-tighter">Rent Your <span className="text-yellow-500">Dream Home</span></h1>
-                   <p className="text-gray-500 font-medium">Browse thousands of shops, apartments and homes.</p>
+                   <h1 className="text-4xl font-black tracking-tighter">{t.rentDreamHome}</h1>
+                   <p className="text-gray-500 font-medium">{t.browseDesc}</p>
                 </div>
                 <Button onClick={() => requireAuth(() => setIsAddModalOpen(true))} className="px-8 py-4 shadow-xl shadow-yellow-400/30">
-                  <Plus size={20} /> Add Property
+                  <Plus size={20} /> {t.addProperty}
                 </Button>
              </div>
 
@@ -846,8 +1163,8 @@ export default function App() {
                   onCityChange={(val: any) => setSearchQuery({...searchQuery, city: val})}
                 />
                 <Input 
-                  label="Search Area, City or Home"
-                  placeholder="Kahin bhi search karein..."
+                  label={t.search}
+                  placeholder={t.searchPlaceholder}
                   value={searchQuery.area}
                   onChange={(e: any) => setSearchQuery({...searchQuery, area: e.target.value})}
                 />
@@ -858,7 +1175,10 @@ export default function App() {
                  <PropertyCard 
                    key={p.id} 
                    property={p} 
-                   onAction={() => requireAuth(() => {})} 
+                   onAction={(type: string) => requireAuth(() => {})} 
+                   onToggleAvailability={handleToggleAvailability}
+                   t={t}
+                   onImageOpen={(images: string[], index: number) => setActiveGallery({ images, index })}
                  />
                ))}
                {filteredProperties.length === 0 && (
@@ -889,6 +1209,15 @@ export default function App() {
           </div>
         </div>
         <div className="flex items-center gap-4">
+           <button 
+             onClick={() => setLang(lang === 'en' ? 'ur' : 'en')}
+             className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-xl transition-all border border-gray-100 group"
+           >
+             <Globe size={18} className="text-gray-400 group-hover:text-yellow-500" />
+             <span className="font-black text-xs uppercase tracking-widest">
+               {lang === 'en' ? 'Urdu' : 'English'}
+             </span>
+           </button>
            {user ? (
              <>
                <div className="hidden sm:block text-right">
@@ -910,10 +1239,22 @@ export default function App() {
       <AnimatePresence>
         {isDrawerOpen && (
           <>
-            <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50]" />
-            <motion.div initial={{x:'-100%'}} animate={{x:0}} exit={{x:'-100%'}} transition={{type:'spring', damping:25}} className="fixed inset-y-0 left-0 w-80 bg-white z-[60] shadow-2xl flex flex-col p-6">
+            <motion.div 
+              initial={{opacity:0}} 
+              animate={{opacity:1}} 
+              exit={{opacity:0}} 
+              onClick={() => setIsDrawerOpen(false)} 
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[50]" 
+            />
+            <motion.div 
+              initial={{x:'-100%'}} 
+              animate={{x:0}} 
+              exit={{x:'-100%'}} 
+              transition={{type:'spring', damping:30, stiffness:300}} 
+              className="fixed inset-y-0 left-0 w-80 bg-white z-[60] shadow-2xl flex flex-col p-6"
+            >
                <div className="flex items-center justify-between mb-8">
-                  <span className="font-black text-2xl tracking-tighter uppercase italic">Menu</span>
+                  <span className="font-black text-2xl tracking-tighter uppercase italic">{t.menu}</span>
                   <button onClick={() => setIsDrawerOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={24} /></button>
                </div>
                <div className="space-y-2 flex-1">
@@ -963,15 +1304,12 @@ export default function App() {
           <span className="font-black tracking-tighter text-2xl italic uppercase underline decoration-yellow-400 underline-offset-4">Rental Hub</span>
         </div>
         
-        <p className="text-gray-400 text-sm font-black uppercase tracking-[0.1em]">© 2026 Admin Panel Reserved. Mehfooz Data.</p>
-        
-        <button 
-          onClick={() => setIsAdminPanelOpen(true)}
-          className="p-6 text-gray-500 hover:text-yellow-500 transition-all active:scale-90 opacity-100 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm"
-          title="Admin Panel"
-        >
-          <Lock size={20} />
-        </button>
+        <p className="text-gray-400 text-xs font-black uppercase tracking-[0.2em] text-center md:text-right">
+          © <span 
+            onClick={() => setIsAdminPanelOpen(true)} 
+            className="cursor-help hover:text-yellow-500 transition-colors"
+          >2026 ADMIN PANEL</span> RESERVED. MEHFOOZ DATA.
+        </p>
       </footer>
 
       <AnimatePresence>
@@ -1075,6 +1413,16 @@ export default function App() {
                 </div>
              </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activeGallery && (
+          <ImageGalleryModal 
+            images={activeGallery.images} 
+            activeIndex={activeGallery.index} 
+            onClose={() => setActiveGallery(null)} 
+          />
         )}
       </AnimatePresence>
     </div>

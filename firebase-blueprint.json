@@ -21,6 +21,7 @@
         "currency": { "type": "string" },
         "language": { "type": "string" },
         "imageUrls": { "type": "array", "items": { "type": "string" }, "description": "Array of 3 image URLs" },
+        "isAvailable": { "type": "boolean", "description": "Is the property currently available?" },
         "createdAt": { "type": "integer" },
         "ownerEmail": { "type": "string" },
         "ownerUid": { "type": "string" }

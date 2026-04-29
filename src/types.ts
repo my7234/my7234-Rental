@@ -19,6 +19,7 @@ export interface Property {
   currency: string;
   language: string;
   imageUrls: string[];
+  isAvailable: boolean;
   createdAt: number;
   ownerEmail: string; // To simulate "my properties"
   ownerUid: string;
