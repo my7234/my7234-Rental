@@ -1,0 +1,11 @@
+{
+  "name": "Kiraya - Rent & List Houses, Shops",
+  "description": "A platform to rent or list houses, apartments, and shops with location search, direct WhatsApp/call buttons, and property management.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "real-time-data",
+    "image-upload"
+  ]
+}

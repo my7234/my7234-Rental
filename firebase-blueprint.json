@@ -1,0 +1,37 @@
+{
+  "entities": {
+    "Property": {
+      "title": "Property",
+      "description": "A rental property listing",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the listing" },
+        "type": { "type": "string", "enum": ["Home", "Shop", "Apartment"] },
+        "stories": { "type": "string", "enum": ["Single", "Double"] },
+        "rooms": { "type": "string" },
+        "bathrooms": { "type": "string" },
+        "country": { "type": "string" },
+        "city": { "type": "string" },
+        "area": { "type": "string" },
+        "address": { "type": "string" },
+        "hasGas": { "type": "boolean" },
+        "hasElectricity": { "type": "boolean" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "currency": { "type": "string" },
+        "language": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "integer" },
+        "ownerEmail": { "type": "string" },
+        "ownerUid": { "type": "string" }
+      },
+      "required": ["title", "type", "stories", "rooms", "bathrooms", "country", "city", "area", "address", "phone", "whatsapp", "currency", "language", "ownerUid"]
+    }
+  },
+  "firestore": {
+    "/properties/{propertyId}": {
+      "schema": "Property",
+      "description": "Collection of all rental properties"
+    }
+  }
+}
