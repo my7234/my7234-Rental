@@ -1,5 +1,5 @@
 {
-  "name": "Kiraya - Rent & List Houses, Shops",
+  "name": "RENTAL HUB",
   "description": "A platform to rent or list houses, apartments, and shops with location search, direct WhatsApp/call buttons, and property management.",
   "requestFramePermissions": [
     "geolocation"

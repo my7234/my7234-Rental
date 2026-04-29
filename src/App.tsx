@@ -21,7 +21,8 @@ import {
   Edit3,
   CheckCircle2,
   XCircle,
-  Navigation
+  Navigation,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Country, City } from 'country-state-city';
@@ -628,6 +629,21 @@ export default function App() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Admin logic
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [adminCodeInput, setAdminCodeInput] = useState('');
+  const [adminError, setAdminError] = useState('');
+
+  const handleAdminVerify = () => {
+    if (adminCodeInput === 'Fast723424') {
+      setIsAdminAuthenticated(true);
+      setAdminError('');
+    } else {
+      setAdminError('Ghalat Code! Dobara koshish karein.');
+    }
+  };
+
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
@@ -664,11 +680,51 @@ export default function App() {
   }, []);
 
   const filteredProperties = useMemo(() => {
-    return properties.filter(p => {
+    const query = searchQuery.area.toLowerCase();
+    
+    // 1. Filter results
+    const filtered = properties.filter(p => {
       const matchCountry = !searchQuery.country || p.country === searchQuery.country;
       const matchCity = !searchQuery.city || p.city === searchQuery.city;
-      const matchArea = !searchQuery.area || p.area.toLowerCase().includes(searchQuery.area.toLowerCase());
-      return matchCountry && matchCity && matchArea;
+      
+      // If there's a search query, it should match ANY of these fields
+      const matchGlobal = !query || (
+        p.area.toLowerCase().includes(query) ||
+        p.city.toLowerCase().includes(query) ||
+        p.country.toLowerCase().includes(query) ||
+        p.title.toLowerCase().includes(query) ||
+        p.address.toLowerCase().includes(query)
+      );
+
+      return matchCountry && matchCity && matchGlobal;
+    });
+
+    // 2. Sort by relevance (Exact match first, then starts with, then contains)
+    if (!query) return filtered;
+
+    return [...filtered].sort((a, b) => {
+      const getScore = (p: Property) => {
+        let score = 0;
+        const cityLower = p.city.toLowerCase();
+        const areaLower = p.area.toLowerCase();
+        const titleLower = p.title.toLowerCase();
+
+        // High priority: Exact matches
+        if (cityLower === query || areaLower === query) score += 100;
+        
+        // Medium priority: Starts with
+        if (cityLower.startsWith(query)) score += 50;
+        if (areaLower.startsWith(query)) score += 40;
+        if (titleLower.startsWith(query)) score += 30;
+
+        // Low priority: Includes
+        if (cityLower.includes(query)) score += 10;
+        if (areaLower.includes(query)) score += 5;
+        
+        return score;
+      };
+
+      return getScore(b) - getScore(a);
     });
   }, [properties, searchQuery]);
 
@@ -766,7 +822,7 @@ export default function App() {
       case 'privacy':
         return <StaticPage title="Privacy Policy" content="Your data is stored locally in your browser for privacy." />;
       case 'about':
-        return <StaticPage title="About Us" content="Kiraya is your premium destination for renting and listing properties globally." />;
+        return <StaticPage title="About Us" content="RENTAL HUB is your premium destination for renting and listing properties globally." />;
       case 'settings':
         return <StaticPage title="Settings" content="Customize your experience with future updates." />;
       default:
@@ -790,8 +846,8 @@ export default function App() {
                   onCityChange={(val: any) => setSearchQuery({...searchQuery, city: val})}
                 />
                 <Input 
-                  label="Area / Neighborhood"
-                  placeholder="Enter area..."
+                  label="Search Area, City or Home"
+                  placeholder="Kahin bhi search karein..."
                   value={searchQuery.area}
                   onChange={(e: any) => setSearchQuery({...searchQuery, area: e.target.value})}
                 />
@@ -829,7 +885,7 @@ export default function App() {
           <button onClick={() => setIsDrawerOpen(true)} className="p-2 hover:bg-gray-100 rounded-xl transition-all"><Menu size={24} /></button>
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentPage('home')}>
              <div className="bg-yellow-400 p-2 rounded-lg"><Home size={20} /></div>
-             <span className="font-black text-2xl tracking-tighter uppercase italic">Kiraya</span>
+             <span className="font-black text-2xl tracking-tighter uppercase italic">Rental Hub</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -898,6 +954,102 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-6 py-10">
         {renderContent()}
       </main>
+
+      <footer className="max-w-7xl mx-auto px-6 py-20 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-8 opacity-80">
+        <div className="flex items-center gap-3">
+          <div className="bg-yellow-400 p-3 rounded-2xl shadow-lg shadow-yellow-400/20">
+            <Home size={24} className="text-black" />
+          </div>
+          <span className="font-black tracking-tighter text-2xl italic uppercase underline decoration-yellow-400 underline-offset-4">Rental Hub</span>
+        </div>
+        
+        <p className="text-gray-400 text-sm font-black uppercase tracking-[0.1em]">© 2026 Admin Panel Reserved. Mehfooz Data.</p>
+        
+        <button 
+          onClick={() => setIsAdminPanelOpen(true)}
+          className="p-6 text-gray-500 hover:text-yellow-500 transition-all active:scale-90 opacity-100 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm"
+          title="Admin Panel"
+        >
+          <Lock size={20} />
+        </button>
+      </footer>
+
+      <AnimatePresence>
+        {isAdminPanelOpen && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setIsAdminPanelOpen(false)} />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative bg-white p-8 md:p-12 rounded-[3.5rem] shadow-2xl max-w-lg w-full text-center space-y-8"
+            >
+              <button onClick={() => setIsAdminPanelOpen(false)} className="absolute top-8 right-8 p-2 hover:bg-gray-100 rounded-full">
+                <X size={24} />
+              </button>
+
+              {!isAdminAuthenticated ? (
+                <div className="space-y-6">
+                  <div className="w-20 h-20 bg-gray-100 rounded-[2rem] mx-auto flex items-center justify-center">
+                    <Lock size={40} className="text-gray-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase italic">Admin Access</h2>
+                    <p className="text-gray-400 text-sm font-bold mt-2">Sirf authorized staff ke liye. Code enter karein.</p>
+                  </div>
+                  <div className="space-y-4">
+                    <input 
+                      type="password" 
+                      placeholder="Admin Code Likhein..."
+                      value={adminCodeInput}
+                      onChange={(e) => setAdminCodeInput(e.target.value)}
+                      className="w-full py-4 px-6 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-center text-2xl tracking-widest outline-none focus:border-yellow-400 transition-all"
+                    />
+                    {adminError && <p className="text-red-500 text-xs font-black uppercase">{adminError}</p>}
+                    <Button onClick={handleAdminVerify} className="w-full py-4">Verify Admin</Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  <div className="w-20 h-20 bg-green-100 rounded-[2rem] mx-auto flex items-center justify-center">
+                    <CheckCircle2 size={40} className="text-green-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase italic">Admin Control</h2>
+                    <p className="text-gray-400 text-sm font-bold mt-2">Tamam listings ka control yahan hai.</p>
+                  </div>
+                  
+                  <div className="max-h-[40vh] overflow-y-auto space-y-2 text-left">
+                    {properties.map(p => (
+                      <div key={p.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        <div className="flex items-center gap-3">
+                           <img src={p.imageUrls?.[0] || 'https://via.placeholder.com/100'} className="w-12 h-12 object-cover rounded-xl" />
+                           <div>
+                              <p className="font-black text-xs uppercase tracking-tight">{p.city}</p>
+                              <p className="text-[10px] font-bold text-gray-400">{p.ownerEmail}</p>
+                           </div>
+                        </div>
+                        <button 
+                          onClick={() => {
+                            if(confirm("Admin: Kya aap ye listing delete karna chahte hain?")) {
+                              propertyService.deleteProperty(p.id);
+                            }
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button onClick={() => setIsAdminAuthenticated(false)} variant="secondary" className="w-full">Admin Logout</Button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isLoginModalOpen && <LoginPage onLogin={handleLogin} onClose={() => setIsLoginModalOpen(false)} />}
