@@ -252,54 +252,81 @@ function StaticPage({ title, content }: any) {
 // --- Cards & Modals ---
 
 function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction }: any) {
+  const [currentImg, setCurrentImg] = useState(0);
+  const images = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls : [p.imageUrl || 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&q=80&w=800'];
+
   const handleAction = (e: React.MouseEvent, type: string) => {
     if (!onAction(type)) {
       e.preventDefault();
     }
   };
 
+  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.address}, ${p.area}, ${p.city}, ${p.country}`)}`;
+
   return (
     <motion.div 
       whileHover={{ y: -5 }}
-      className="group bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col"
+      className="group bg-white rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col relative"
     >
-      <div className="relative h-56 overflow-hidden">
+      <div className="relative h-72 overflow-hidden">
         <img 
-          src={p.imageUrl} 
+          src={images[currentImg]} 
           alt={p.title} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute top-4 left-4">
-          <span className="px-4 py-1.5 bg-yellow-400 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
+        <div className="absolute top-6 left-6">
+          <span className="px-5 py-2 bg-yellow-400 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl">
             {p.type}
           </span>
         </div>
-        <div className="absolute bottom-4 right-4 group-hover:translate-x-0 translate-x-12 opacity-0 group-hover:opacity-100 transition-all">
+
+        {images.length > 1 && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {images.map((_, idx) => (
+              <button 
+                key={idx} 
+                onClick={(e) => { e.stopPropagation(); setCurrentImg(idx); }}
+                className={`w-2 h-2 rounded-full transition-all ${idx === currentImg ? 'bg-yellow-400 w-5' : 'bg-white/60'}`}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="absolute top-6 right-6">
           <a 
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.address}, ${p.area}, ${p.city}, ${p.country}`)}`} 
+            href={googleMapsUrl} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-yellow-600 shadow-lg hover:bg-yellow-400 hover:text-black transition-colors"
+            className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-red-500 shadow-xl hover:bg-red-500 hover:text-white transition-all active:scale-90"
           >
-            <MapPin size={20} />
+            <motion.div
+              animate={{ y: [0, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            >
+              <MapPin size={28} fill="currentColor" fillOpacity={0.2} />
+            </motion.div>
           </a>
         </div>
       </div>
 
-      <div className="p-6 space-y-4 flex-1 flex flex-col">
-        <div className="space-y-1">
-          <h4 className="text-xl font-bold tracking-tight text-gray-900 group-hover:text-yellow-600 transition-colors line-clamp-1">{p.title}</h4>
-          <div className="flex items-center gap-1.5 text-gray-400">
-            <MapPin size={14} className="text-yellow-500 shrink-0" />
-            <span className="text-xs font-semibold uppercase tracking-wider line-clamp-1">{p.area}, {p.city}</span>
+      <div className="p-8 space-y-6 flex-1 flex flex-col">
+        <div className="space-y-4">
+          <div className="space-y-1">
+             <span className="text-sm font-black text-[#8B4513] uppercase tracking-[0.2em]">{p.area}</span>
+             <h4 className="text-5xl font-black tracking-tighter text-green-600 leading-none group-hover:text-green-700 transition-colors uppercase">{p.city}</h4>
+          </div>
+          
+          <div className="space-y-1 pt-2 border-t border-gray-50">
+             <p className="text-base font-bold text-red-500 leading-tight line-clamp-2">{p.address}</p>
+             <h3 className="text-xl font-bold tracking-tight text-gray-800 pt-2">{p.title}</h3>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <span className="px-2 py-1 bg-gray-100 text-[10px] font-bold rounded-md">{p.rooms} Rooms</span>
-          <span className="px-2 py-1 bg-gray-100 text-[10px] font-bold rounded-md">{p.bathrooms} Baths</span>
-          <span className="px-2 py-1 bg-gray-100 text-[10px] font-bold rounded-md">{p.stories} Story</span>
+        <div className="flex flex-wrap gap-2 pt-2">
+          <span className="px-4 py-2 bg-gray-50 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-gray-100">{p.rooms} Rooms</span>
+          <span className="px-4 py-2 bg-gray-50 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-gray-100">{p.bathrooms} Baths</span>
+          <span className="px-4 py-2 bg-gray-50 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-gray-100">{p.stories} Story</span>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -307,9 +334,12 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction }: an
           <Badge active={p.hasElectricity} label="Electric" />
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-           <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{p.language}</span>
-           <span className="text-sm font-black text-yellow-600">{p.currency}</span>
+        <div className="flex items-center justify-between pt-6 border-t border-gray-50 mt-auto">
+           <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{p.language}</span>
+           <div className="text-right">
+              <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Rent Per Month</span>
+              <span className="text-2xl font-black text-yellow-600">{p.currency} {p.price || 'Free'}</span>
+           </div>
         </div>
 
 
@@ -398,7 +428,25 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
     whatsapp: editingProperty?.whatsapp || '',
     currency: editingProperty?.currency || '',
     language: editingProperty?.language || '',
+    imageUrls: editingProperty?.imageUrls || [] as string[],
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 500) { // Limit to 0.5MB for stability on some networks
+        alert("Image bohot badi hai, meharbani karke choti image (under 500kb) use karein.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newImages = [...formData.imageUrls];
+        newImages[index] = reader.result as string;
+        setFormData({ ...formData, imageUrls: newImages });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const languageMap: Record<string, string> = {
     'PK': 'Urdu',
@@ -475,6 +523,31 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
             </Select>
             <Input label="Rooms" type="number" value={formData.rooms} onChange={(e: any) => setFormData({...formData, rooms: e.target.value})} />
             <Input label="Bathrooms" type="number" value={formData.bathrooms} onChange={(e: any) => setFormData({...formData, bathrooms: e.target.value})} />
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Tasaveer Upload Karein (Max 3)</p>
+            <div className="grid grid-cols-3 gap-4">
+              {[0, 1, 2].map((idx) => (
+                <label key={idx} className="relative aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer overflow-hidden group hover:border-yellow-400 transition-all">
+                  {formData.imageUrls[idx] ? (
+                    <>
+                      <img src={formData.imageUrls[idx]} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <Plus size={24} className="text-white rotate-45" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center p-1">
+                      <Plus size={20} className="mx-auto text-gray-300 group-hover:text-yellow-400 transition-colors" />
+                      <span className="text-[7px] font-black text-gray-400 uppercase mt-1 block">Photo {idx + 1}</span>
+                    </div>
+                  )}
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageChange(e, idx)} />
+                </label>
+              ))}
+            </div>
+            <p className="text-[10px] text-gray-400 font-bold">Note: Badi images system slow kar sakti hain.</p>
           </div>
 
           <div className="space-y-4">

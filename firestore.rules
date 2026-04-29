@@ -45,7 +45,7 @@ service cloud.firestore {
         && data.whatsapp is string && data.whatsapp.size() <= 30
         && data.currency is string && data.currency.size() <= 10
         && data.language is string && data.language.size() <= 100
-        && data.imageUrl is string && data.imageUrl.size() <= 500
+        && data.imageUrls is list && data.imageUrls.size() <= 3
         && data.createdAt is int
         && data.ownerEmail is string
         && data.ownerUid == request.auth.uid;

@@ -18,7 +18,7 @@ export interface Property {
   whatsapp: string;
   currency: string;
   language: string;
-  imageUrl: string;
+  imageUrls: string[];
   createdAt: number;
   ownerEmail: string; // To simulate "my properties"
   ownerUid: string;

@@ -20,7 +20,7 @@
         "whatsapp": { "type": "string" },
         "currency": { "type": "string" },
         "language": { "type": "string" },
-        "imageUrl": { "type": "string" },
+        "imageUrls": { "type": "array", "items": { "type": "string" }, "description": "Array of 3 image URLs" },
         "createdAt": { "type": "integer" },
         "ownerEmail": { "type": "string" },
         "ownerUid": { "type": "string" }
