@@ -738,8 +738,8 @@ function PropertyModal({ onClose, onSave, editingProperty, isModerating }: any) 
           >
             <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
             <div className="text-center">
-              <p className="text-xl font-black uppercase italic tracking-tighter">AI Moderation...</p>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Checking image safety</p>
+              <p className="text-xl font-black uppercase italic tracking-tighter">AI Security Scan...</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Verifying content safety</p>
             </div>
           </motion.div>
         )}
@@ -1301,7 +1301,7 @@ export default function App() {
                 />
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                {filteredProperties.map(p => (
                  <PropertyCard 
                    key={p.id} 
@@ -1331,45 +1331,45 @@ export default function App() {
           {connectionError}
         </div>
       )}
-      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100 px-3 md:px-6 py-3 md:py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 md:gap-4">
-          <button onClick={() => setIsDrawerOpen(true)} className="p-2 hover:bg-gray-100 rounded-xl transition-all"><Menu size={20} className="md:w-6 md:h-6" /></button>
+      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100 px-2 md:px-6 py-2 md:py-4 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 md:gap-4">
+          <button onClick={() => setIsDrawerOpen(true)} className="p-1.5 hover:bg-gray-100 rounded-xl transition-all"><Menu size={18} className="md:w-6 md:h-6" /></button>
           <div className="flex items-center gap-1 md:gap-2 cursor-pointer" onClick={() => setCurrentPage('home')}>
-             <div className="bg-yellow-400 p-1.5 md:p-2 rounded-lg shadow-sm"><Home size={18} className="md:w-5 md:h-5" /></div>
-             <div className="flex flex-col md:flex-row md:items-center leading-none">
-                <span className="font-black text-lg md:text-2xl tracking-tighter uppercase italic text-black">Rental</span>
-                <span className="font-black text-lg md:text-2xl tracking-tighter uppercase italic text-yellow-500 md:ml-1">Hub</span>
+             <div className="bg-yellow-400 p-1 md:p-2 rounded-lg shadow-sm"><Home size={16} className="md:w-5 md:h-5" /></div>
+             <div className="flex flex-col md:flex-row md:items-center leading-tight md:leading-none">
+                <span className="font-black text-base md:text-2xl tracking-tighter uppercase italic text-black">Rental</span>
+                <span className="font-black text-base md:text-2xl tracking-tighter uppercase italic text-yellow-500 md:ml-1">Hub</span>
              </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1.5 md:gap-4">
            <button 
              onClick={() => setIsInstallModalOpen(true)}
-             className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-yellow-400 hover:text-black rounded-xl transition-all active:scale-95 border border-gray-100 dark:border-gray-800 shadow-sm"
+             className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-yellow-400 hover:text-black rounded-xl transition-all active:scale-95 border border-gray-100 dark:border-gray-800 shadow-sm"
              title="Download App"
            >
-             <Smartphone size={18} className="md:w-5 md:h-5" />
+             <Smartphone size={16} className="md:w-5 md:h-5" />
            </button>
 
            <button 
              onClick={() => setLang(lang === 'en' ? 'ur' : 'en')}
-             className="flex items-center gap-2 px-3 md:px-4 py-2 hover:bg-gray-100 rounded-xl transition-all border border-gray-100 group"
+             className="flex items-center justify-center w-8 h-8 md:w-auto md:px-4 md:py-2 hover:bg-gray-100 rounded-xl transition-all border border-gray-100 group"
            >
-             <Globe size={18} className="text-gray-400 group-hover:text-yellow-500" />
-             <span className="font-black text-xs uppercase tracking-widest hidden sm:inline">
+             <Globe size={16} className="text-gray-400 group-hover:text-yellow-500" />
+             <span className="font-black text-[10px] uppercase tracking-widest hidden md:inline ml-2">
                {lang === 'en' ? 'Urdu' : 'English'}
              </span>
            </button>
            {user ? (
-             <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
                <div className="hidden md:block text-right">
                   <p className="text-xs font-bold">{user.displayName}</p>
                   <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Online</p>
                </div>
-               <div className="w-9 h-9 md:w-10 md:h-10 rounded-full border-2 border-yellow-400 cursor-pointer overflow-hidden bg-gray-100 shadow-sm" onClick={() => setCurrentPage('profile')}>
+               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-yellow-400 cursor-pointer overflow-hidden bg-gray-100 shadow-sm ring-2 ring-yellow-400/20" onClick={() => setCurrentPage('profile')}>
                  <img src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.displayName}`} alt="avatar" className="w-full h-full object-cover" />
                </div>
-             </div>
+            </div>
            ) : (
              <Button onClick={() => setIsLoginModalOpen(true)} variant="outline" className="text-[10px] md:text-xs font-black uppercase tracking-widest px-3 md:px-6 py-2">
                 Login
@@ -1434,7 +1434,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <main className="max-w-7xl mx-auto px-6 py-10">
+      <main className="max-w-7xl mx-auto px-2 md:px-6 py-6 md:py-10">
         {renderContent()}
       </main>
 
@@ -1443,7 +1443,10 @@ export default function App() {
           <div className="bg-yellow-400 p-3 rounded-2xl shadow-lg shadow-yellow-400/20">
             <Home size={24} className="text-black" />
           </div>
-          <span className="font-black tracking-tighter text-2xl italic uppercase underline decoration-yellow-400 underline-offset-4">Rental Hub</span>
+          <div className="flex flex-col md:flex-row md:items-center leading-none">
+            <span className="font-black tracking-tighter text-2xl italic uppercase text-black">Rental</span>
+            <span className="font-black tracking-tighter text-2xl italic uppercase text-yellow-500 md:ml-1">Hub</span>
+          </div>
         </div>
         
         <p className="text-gray-400 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-center md:text-right">
