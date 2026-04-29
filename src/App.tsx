@@ -471,7 +471,7 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onTo
       className="group bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col relative"
     >
       <div 
-        className="relative h-72 overflow-hidden cursor-zoom-in"
+        className="relative h-48 md:h-72 overflow-hidden cursor-zoom-in"
         onClick={() => onImageOpen && onImageOpen(images, currentImg)}
       >
         <img 
@@ -526,23 +526,23 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onTo
         </div>
       </div>
 
-      <div className="p-8 space-y-6 flex-1 flex flex-col">
-        <div className="space-y-4">
+      <div className="p-5 md:p-8 space-y-4 md:space-y-6 flex-1 flex flex-col">
+        <div className="space-y-3 md:space-y-4">
           <div className="space-y-1">
-             <span className="text-sm font-black text-[#8B4513] uppercase tracking-[0.2em]">{p.area}</span>
-             <h4 className="text-3xl md:text-5xl font-black tracking-tighter text-green-600 leading-none group-hover:text-green-700 transition-colors uppercase">{p.city}</h4>
+             <span className="text-[10px] md:text-sm font-black text-[#8B4513] uppercase tracking-[0.2em]">{p.area}</span>
+             <h4 className="text-2xl md:text-5xl font-black tracking-tighter text-green-600 leading-none group-hover:text-green-700 transition-colors uppercase">{p.city}</h4>
           </div>
           
           <div className="space-y-1 pt-2 border-t border-gray-50">
-             <p className="text-base font-bold text-red-500 leading-tight line-clamp-2">{p.address}</p>
-             <h3 className="text-xl font-bold tracking-tight text-gray-800 pt-2">{p.title}</h3>
+             <p className="text-sm md:text-base font-bold text-red-500 leading-tight line-clamp-2">{p.address}</p>
+             <h3 className="text-base md:text-xl font-bold tracking-tight text-gray-800 pt-1 md:pt-2">{p.title}</h3>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 pt-2">
-          <span className="px-4 py-2 bg-gray-50 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-gray-100">{p.rooms} Rooms</span>
-          <span className="px-4 py-2 bg-gray-50 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-gray-100">{p.bathrooms} Baths</span>
-          <span className="px-4 py-2 bg-gray-50 text-[11px] font-black uppercase tracking-widest rounded-2xl border border-gray-100">{p.stories} Story</span>
+        <div className="flex flex-wrap gap-1.5 md:gap-2 pt-1 md:pt-2">
+          <span className="px-3 md:px-4 py-1.5 md:py-2 bg-gray-50 text-[10px] md:text-[11px] font-black uppercase tracking-widest rounded-xl md:rounded-2xl border border-gray-100">{p.rooms} Rooms</span>
+          <span className="px-3 md:px-4 py-1.5 md:py-2 bg-gray-50 text-[10px] md:text-[11px] font-black uppercase tracking-widest rounded-xl md:rounded-2xl border border-gray-100">{p.bathrooms} Baths</span>
+          <span className="px-3 md:px-4 py-1.5 md:py-2 bg-gray-50 text-[10px] md:text-[11px] font-black uppercase tracking-widest rounded-xl md:rounded-2xl border border-gray-100">{p.stories} Story</span>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -550,11 +550,11 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onTo
           <Badge active={p.hasElectricity} label="Electric" />
         </div>
 
-        <div className="flex items-center justify-between pt-6 border-t border-gray-50 mt-auto">
+        <div className="flex items-center justify-between pt-4 md:pt-6 border-t border-gray-50 mt-auto">
            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{p.language}</span>
            <div className="text-right">
-              <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Rent Per Month</span>
-              <span className="text-2xl font-black text-yellow-600">{p.currency} {p.price || 'Free'}</span>
+              <span className="block text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest">Rent Per Month</span>
+              <span className="text-xl md:text-2xl font-black text-yellow-600">{p.currency} {p.price || 'Free'}</span>
            </div>
         </div>
 
@@ -1275,17 +1275,17 @@ export default function App() {
       default:
         return (
           <div className="space-y-8 animate-in fade-in duration-500">
-             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                   <h1 className="text-3xl md:text-4xl font-black tracking-tighter">{t.rentDreamHome}</h1>
-                   <p className="text-gray-500 font-medium">{t.browseDesc}</p>
+                   <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">{t.rentDreamHome}</h1>
+                   <p className="text-gray-500 font-medium mt-2 text-sm md:text-base">{t.browseDesc}</p>
                 </div>
-                <Button onClick={() => requireAuth(() => setIsAddModalOpen(true))} className="px-8 py-4 shadow-xl shadow-yellow-400/30">
+                <Button onClick={() => requireAuth(() => setIsAddModalOpen(true))} className="w-full md:w-auto px-8 py-5 shadow-xl shadow-yellow-400/30 font-black italic uppercase tracking-tighter">
                   <Plus size={20} /> {t.addProperty}
                 </Button>
              </div>
 
-             <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4">
+             <div className="bg-white p-4 md:p-6 rounded-[2rem] border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4">
                 <LocationSelector 
                   selectedCountry={searchQuery.country}
                   selectedCity={searchQuery.city}
@@ -1331,44 +1331,47 @@ export default function App() {
           {connectionError}
         </div>
       )}
-      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setIsDrawerOpen(true)} className="p-2 hover:bg-gray-100 rounded-xl transition-all"><Menu size={24} /></button>
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentPage('home')}>
-             <div className="bg-yellow-400 p-2 rounded-lg"><Home size={20} /></div>
-             <span className="font-black text-2xl tracking-tighter uppercase italic">Rental Hub</span>
+      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-100 px-3 md:px-6 py-3 md:py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 md:gap-4">
+          <button onClick={() => setIsDrawerOpen(true)} className="p-2 hover:bg-gray-100 rounded-xl transition-all"><Menu size={20} className="md:w-6 md:h-6" /></button>
+          <div className="flex items-center gap-1 md:gap-2 cursor-pointer" onClick={() => setCurrentPage('home')}>
+             <div className="bg-yellow-400 p-1.5 md:p-2 rounded-lg shadow-sm"><Home size={18} className="md:w-5 md:h-5" /></div>
+             <div className="flex flex-col md:flex-row md:items-center leading-none">
+                <span className="font-black text-lg md:text-2xl tracking-tighter uppercase italic text-black">Rental</span>
+                <span className="font-black text-lg md:text-2xl tracking-tighter uppercase italic text-yellow-500 md:ml-1">Hub</span>
+             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
            <button 
              onClick={() => setIsInstallModalOpen(true)}
-             className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-yellow-400 hover:text-black rounded-xl transition-all active:scale-95 border border-gray-100 dark:border-gray-800 shadow-sm"
+             className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-yellow-400 hover:text-black rounded-xl transition-all active:scale-95 border border-gray-100 dark:border-gray-800 shadow-sm"
              title="Download App"
            >
-             <Smartphone size={20} />
+             <Smartphone size={18} className="md:w-5 md:h-5" />
            </button>
 
            <button 
              onClick={() => setLang(lang === 'en' ? 'ur' : 'en')}
-             className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-xl transition-all border border-gray-100 group"
+             className="flex items-center gap-2 px-3 md:px-4 py-2 hover:bg-gray-100 rounded-xl transition-all border border-gray-100 group"
            >
              <Globe size={18} className="text-gray-400 group-hover:text-yellow-500" />
-             <span className="font-black text-xs uppercase tracking-widest">
+             <span className="font-black text-xs uppercase tracking-widest hidden sm:inline">
                {lang === 'en' ? 'Urdu' : 'English'}
              </span>
            </button>
            {user ? (
-             <>
-               <div className="hidden sm:block text-right">
+             <div className="flex items-center gap-2">
+               <div className="hidden md:block text-right">
                   <p className="text-xs font-bold">{user.displayName}</p>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Logged In</p>
+                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Online</p>
                </div>
-               <div className="w-10 h-10 rounded-full border-2 border-yellow-400 cursor-pointer overflow-hidden bg-gray-100" onClick={() => setCurrentPage('profile')}>
-                 <img src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.displayName}`} alt="avatar" />
+               <div className="w-9 h-9 md:w-10 md:h-10 rounded-full border-2 border-yellow-400 cursor-pointer overflow-hidden bg-gray-100 shadow-sm" onClick={() => setCurrentPage('profile')}>
+                 <img src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.displayName}`} alt="avatar" className="w-full h-full object-cover" />
                </div>
-             </>
+             </div>
            ) : (
-             <Button onClick={() => setIsLoginModalOpen(true)} variant="outline" className="text-xs font-black uppercase tracking-widest px-6">
+             <Button onClick={() => setIsLoginModalOpen(true)} variant="outline" className="text-[10px] md:text-xs font-black uppercase tracking-widest px-3 md:px-6 py-2">
                 Login
              </Button>
            )}
