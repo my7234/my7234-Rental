@@ -28,8 +28,10 @@ import {
   Sun,
   Bell,
   DollarSign,
+  Smartphone,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Download
 } from 'lucide-react';
 
 const translations: any = {
@@ -40,33 +42,33 @@ const translations: any = {
     privacy: 'Privacy',
     about: 'About',
     settings: 'Settings',
-    search: 'Search properties...',
+    search: 'Search local area...',
     available: 'Available',
     booked: 'Booked',
-    taken: 'TAKEN',
+    taken: 'OCCUPIED',
     menu: 'Menu',
-    logout: 'Logout',
+    logout: 'Sign Out',
     contact: 'Contact',
     amenities: 'Amenities',
     status: 'Listing Status',
-    markBooked: 'Mark as Booked',
+    markBooked: 'Mark as Rented',
     markAvailable: 'Mark as Available',
-    edit: 'Edit',
-    delete: 'Delete',
+    edit: 'Edit Listing',
+    delete: 'Remove',
     pkr: 'PKR',
     usd: 'USD',
     darkMode: 'Dark Mode',
     notifications: 'Notifications',
     language: 'Language',
     currency: 'Currency',
-    all: 'All',
-    homes: 'Homes',
+    all: 'All types',
+    homes: 'Residential',
     apartments: 'Apartments',
-    shops: 'Shops',
-    rentDreamHome: 'Rent Your Dream Home',
-    browseDesc: 'Browse thousands of shops, apartments and homes.',
-    addProperty: 'Add Property',
-    searchPlaceholder: 'Search anything...'
+    shops: 'Commercial',
+    rentDreamHome: 'Global Property Marketplace',
+    browseDesc: 'Discover premium apartments, houses, and commercial spaces worldwide.',
+    addProperty: 'Post a Property',
+    searchPlaceholder: 'Search specific address or area...'
   },
   ur: {
     home: 'ہوم',
@@ -75,17 +77,17 @@ const translations: any = {
     privacy: 'پرائیویسی',
     about: 'بارے میں',
     settings: 'سیٹنگز',
-    search: 'پراپرٹی تلاش کریں...',
-    available: 'خالی ہے',
+    search: 'تلاش کریں...',
+    available: 'دستیاب',
     booked: 'بُک ہو چکا',
-    taken: 'لے لیا گیا ہے',
+    taken: 'بُک ہے',
     menu: 'مینیو',
     logout: 'لاگ آؤٹ',
     contact: 'رابطہ',
     amenities: 'سہولیات',
     status: 'سٹیٹس',
     markBooked: 'بُک کریں',
-    markAvailable: 'خالی کریں',
+    markAvailable: 'دستیاب کریں',
     edit: 'ایڈٹ',
     delete: 'ختم کریں',
     pkr: 'روپیہ',
@@ -98,9 +100,9 @@ const translations: any = {
     homes: 'گھر',
     apartments: 'اپارٹمنٹ',
     shops: 'دکان',
-    rentDreamHome: 'اپنا خوابوں کا گھر کرایہ پر لیں',
+    rentDreamHome: 'عالمی پراپرٹی مارکیٹ',
     browseDesc: 'ہزاروں دکانیں، اپارٹمنٹس اور گھر دیکھیں۔',
-    addProperty: 'پراپرٹی شامل کریں',
+    addProperty: 'پراپرٹی لگائیں',
     searchPlaceholder: 'کچھ بھی تلاش کریں...'
   }
 };
@@ -187,13 +189,13 @@ function LoginPage({ onLogin, onClose }: { onLogin: (credentials?: any) => void;
         </div>
         
         <div className="space-y-4">
-           <h2 className="text-2xl font-black tracking-tight">{isRegister ? 'Account Banayein' : 'Login Karein'}</h2>
-           <p className="text-gray-500 text-sm">Apni details enter karein ya Google se continue karein.</p>
+           <h2 className="text-2xl font-black tracking-tight">{isRegister ? 'Create Account' : 'Welcome Back'}</h2>
+           <p className="text-gray-500 text-sm">Enter your details or use social login to continue.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
-           {isRegister && <Input label="Poora Naam" placeholder="e.g. Ali Khan" value={fullName} onChange={(e: any) => setFullName(e.target.value)} />}
-           <Input label="Email / Phone Number" placeholder="Phone ya Email likhein..." value={emailOrPhone} onChange={(e: any) => setEmailOrPhone(e.target.value)} />
+           {isRegister && <Input label="Full Name" placeholder="e.g. John Doe" value={fullName} onChange={(e: any) => setFullName(e.target.value)} />}
+           <Input label="Email / Phone" placeholder="Enter your email or phone..." value={emailOrPhone} onChange={(e: any) => setEmailOrPhone(e.target.value)} />
            <Input label="Password" type="password" placeholder="••••••••" value={password} onChange={(e: any) => setPassword(e.target.value)} />
            
            {error && <p className="text-red-500 text-xs font-bold uppercase tracking-widest">{error}</p>}
@@ -205,16 +207,16 @@ function LoginPage({ onLogin, onClose }: { onLogin: (credentials?: any) => void;
 
         <div className="relative">
            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100"></div></div>
-           <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-gray-400 font-bold">Ya Phir</span></div>
+           <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-gray-400 font-bold">OR</span></div>
         </div>
 
         <Button onClick={() => onLogin()} variant="outline" className="w-full py-4 text-sm active:scale-95 transition-transform">
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="google" />
-          Google ke sath Jariyein
+          Continue with Google
         </Button>
 
         <p className="text-xs font-bold text-gray-500">
-          {isRegister ? 'Pehle se account hai?' : 'Naye hain?'} 
+          {isRegister ? 'Already have an account?' : 'New user?'} 
           <button onClick={() => setIsRegister(!isRegister)} className="ml-1 text-yellow-600 underline">
             {isRegister ? 'Login' : 'Create Account'}
           </button>
@@ -337,6 +339,54 @@ function StaticPage({ title, content }: any) {
       <div className="h-1 w-20 bg-yellow-400 mx-auto rounded-full" />
       <p className="text-lg text-gray-600 leading-relaxed">{content}</p>
       <Button variant="secondary" onClick={() => window.location.reload()}>Back to Home</Button>
+    </div>
+  );
+}
+
+function InstallAppModal({ onClose }: any) {
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+      <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="relative bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl max-w-lg w-full space-y-8"
+      >
+        <button onClick={onClose} className="absolute top-8 right-8 p-2 hover:bg-gray-100 rounded-full">
+          <X size={24} />
+        </button>
+
+        <div className="text-center space-y-4">
+          <div className="w-20 h-20 bg-yellow-400 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-yellow-400/20">
+            <Smartphone size={40} className="text-black" />
+          </div>
+          <h2 className="text-3xl font-black tracking-tighter uppercase italic">Install Mobile App</h2>
+          <p className="text-gray-500 font-bold uppercase text-[10px] tracking-widest leading-relaxed">
+            No need for a bulky APK! You can install our High-Speed Web App directly from your browser.
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 flex items-start gap-4">
+            <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center flex-shrink-0 font-black text-yellow-500">1</div>
+            <div>
+              <p className="font-black text-sm uppercase tracking-tight mb-1">Android Users (Chrome)</p>
+              <p className="text-xs text-gray-500 font-medium leading-relaxed">Click the <span className="font-bold text-black font-mono">⋮ (3 dots)</span> at the top right and select <span className="text-yellow-600 font-bold italic">"Install App"</span> or <span className="text-yellow-600 font-bold italic">"Add to Home Screen"</span>.</p>
+            </div>
+          </div>
+
+          <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 flex items-start gap-4">
+            <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center flex-shrink-0 font-black text-yellow-500">2</div>
+            <div>
+              <p className="font-black text-sm uppercase tracking-tight mb-1">iPhone Users (Safari)</p>
+              <p className="text-xs text-gray-500 font-medium leading-relaxed">Tap the <span className="font-bold text-black italic">Share</span> button and select <span className="text-yellow-600 font-bold italic">"Add to Home Screen"</span> from the list.</p>
+            </div>
+          </div>
+        </div>
+
+        <Button onClick={onClose} className="w-full py-5 text-lg font-black italic tracking-tighter">GOT IT!</Button>
+      </motion.div>
     </div>
   );
 }
@@ -560,7 +610,7 @@ const Badge = ({ active, label }: any) => (
   </div>
 );
 
-function LocationSelector({ selectedCountry, selectedCity, onCountryChange, onCityChange }: any) {
+function LocationSelector({ selectedCountry, selectedCity, onCountryChange, onCityChange, onLanguageChange }: any) {
   const countries = Country.getAllCountries();
   const cities = selectedCountry ? City.getCitiesOfCountry(selectedCountry) : [];
 
@@ -569,7 +619,16 @@ function LocationSelector({ selectedCountry, selectedCity, onCountryChange, onCi
       <Select 
         label="Country" 
         value={selectedCountry} 
-        onChange={(e: any) => onCountryChange(e.target.value)}
+        onChange={(e: any) => {
+          const val = e.target.value;
+          onCountryChange(val);
+          // Auto-Language logic: If Pakistan is selected, switch to Urdu. For others, default to English.
+          if (val === 'PK') {
+            onLanguageChange && onLanguageChange('ur');
+          } else {
+            onLanguageChange && onLanguageChange('en');
+          }
+        }}
       >
         <option value="">Select Country</option>
         {countries.map(c => <option key={c.isoCode} value={c.isoCode}>{c.name}</option>)}
@@ -722,7 +781,7 @@ function PropertyModal({ onClose, onSave, editingProperty, isModerating }: any) 
           </div>
 
           <div className="space-y-4">
-            <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Tasaveer Upload Karein (Max 3)</p>
+            <p className="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">Upload Property Photos (Max 3)</p>
             <div className="grid grid-cols-3 gap-4">
               {[0, 1, 2].map((idx) => (
                 <label key={idx} className="relative aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer overflow-hidden group hover:border-yellow-400 transition-all">
@@ -743,7 +802,7 @@ function PropertyModal({ onClose, onSave, editingProperty, isModerating }: any) 
                 </label>
               ))}
             </div>
-            <p className="text-[10px] text-gray-400 font-bold">Note: Badi images system slow kar sakti hain.</p>
+            <p className="text-[10px] text-gray-400 font-bold">Tip: High quality images lead to faster responses.</p>
           </div>
 
           <div className="space-y-4">
@@ -822,6 +881,7 @@ export default function App() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeGallery, setActiveGallery] = useState<{images: string[], index: number} | null>(null);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
 
   // Admin logic
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
@@ -851,7 +911,7 @@ export default function App() {
         console.error("Stats fetch failed", err);
       }
     } else {
-      setAdminError('Ghalat Code! Dobara koshish karein.');
+      setAdminError('Invalid Admin Code! Please try again.');
     }
   };
 
@@ -1043,7 +1103,7 @@ export default function App() {
           });
 
           if (response.text?.trim().toUpperCase() === 'YES') {
-            alert("MAZIRAT: Ye image policy ke khilaf hai (Inappropriate Content). Meharbani karke koi dusri image upload karein.");
+            alert("SAFETY ALERT: This image violates our content policy (contains inappropriate material). Please upload a standard property photo.");
             setIsModerating(false);
             return;
           }
@@ -1163,28 +1223,28 @@ export default function App() {
               {[
                 { 
                   label: t.darkMode, 
-                  desc: 'Siyah/Dark theme enable karein', 
+                  desc: 'Enable black/dark theme for your eyes', 
                   value: isDarkMode ? 'Enabled' : 'Disabled', 
                   icon: <Moon size={20} />,
                   action: () => setIsDarkMode(!isDarkMode)
                 },
                 { 
                   label: t.notifications, 
-                  desc: 'Naye listings ke alerts', 
+                  desc: 'Get alerts for new properties', 
                   value: isNotificationsEnabled ? 'Enabled' : 'Disabled', 
                   icon: <Bell size={20} />,
                   action: () => setIsNotificationsEnabled(!isNotificationsEnabled)
                 },
                 { 
                   label: t.language, 
-                  desc: 'App ki zaban tabdeel karein', 
-                  value: lang === 'en' ? 'English' : 'اردو', 
+                  desc: 'Change application language', 
+                  value: lang === 'en' ? 'English' : 'Urdu', 
                   icon: <Globe size={20} />,
                   action: () => setLang(lang === 'en' ? 'ur' : 'en')
                 },
                 { 
                   label: t.currency, 
-                  desc: 'Default price format', 
+                  desc: 'Switch between global currencies', 
                   value: currency, 
                   icon: <DollarSign size={20} />,
                   action: () => setCurrency(currency === 'PKR' ? 'USD' : 'PKR')
@@ -1231,6 +1291,7 @@ export default function App() {
                   selectedCity={searchQuery.city}
                   onCountryChange={(val: any) => setSearchQuery({...searchQuery, country: val, city: ''})}
                   onCityChange={(val: any) => setSearchQuery({...searchQuery, city: val})}
+                  onLanguageChange={(l: string) => setLang(l)}
                 />
                 <Input 
                   label={t.search}
@@ -1279,6 +1340,14 @@ export default function App() {
           </div>
         </div>
         <div className="flex items-center gap-4">
+           <button 
+             onClick={() => setIsInstallModalOpen(true)}
+             className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-yellow-400 hover:text-black rounded-xl transition-all active:scale-95 border border-gray-100 dark:border-gray-800 shadow-sm"
+             title="Download App"
+           >
+             <Smartphone size={20} />
+           </button>
+
            <button 
              onClick={() => setLang(lang === 'en' ? 'ur' : 'en')}
              className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-xl transition-all border border-gray-100 group"
@@ -1378,7 +1447,7 @@ export default function App() {
           © <span 
             onClick={() => setIsAdminPanelOpen(true)} 
             className="cursor-help hover:text-yellow-500 transition-colors"
-          >2026 ADMIN PANEL</span> RESERVED. MEHFOOZ DATA.
+          >2026 ADMIN PANEL</span> RESERVED. GLOBAL DATA PROTECTION.
         </p>
       </footer>
 
@@ -1403,12 +1472,12 @@ export default function App() {
                   </div>
                   <div>
                     <h2 className="text-3xl font-black tracking-tighter uppercase italic">Admin Access</h2>
-                    <p className="text-gray-400 text-sm font-bold mt-2">Sirf authorized staff ke liye. Code enter karein.</p>
+                    <p className="text-gray-400 text-sm font-bold mt-2">Secure access for authorized personnel only.</p>
                   </div>
                   <div className="space-y-4">
                     <input 
                       type="password" 
-                      placeholder="Admin Code Likhein..."
+                      placeholder="Enter Admin Access Code..."
                       value={adminCodeInput}
                       onChange={(e) => setAdminCodeInput(e.target.value)}
                       className="w-full py-4 px-6 bg-gray-50 border-2 border-gray-100 rounded-2xl font-black text-center text-2xl tracking-widest outline-none focus:border-yellow-400 transition-all"
@@ -1423,8 +1492,8 @@ export default function App() {
                     <CheckCircle2 size={40} className="text-green-500" />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-black tracking-tighter uppercase italic">Admin Control</h2>
-                    <p className="text-gray-400 text-sm font-bold mt-2">Tamam listings ka control yahan hai.</p>
+                    <h2 className="text-3xl font-black tracking-tighter uppercase italic">Management</h2>
+                    <p className="text-gray-400 text-sm font-bold mt-2">Oversee all platform properties and user counts.</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -1450,7 +1519,7 @@ export default function App() {
                         </div>
                         <button 
                           onClick={() => {
-                            if(confirm("Admin: Kya aap ye listing delete karna chahte hain?")) {
+                            if(confirm("DANGER: Are you sure you want to permanently delete this listing?")) {
                               propertyService.deleteProperty(p.id);
                             }
                           }}
@@ -1501,6 +1570,12 @@ export default function App() {
                 </div>
              </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isInstallModalOpen && (
+          <InstallAppModal onClose={() => setIsInstallModalOpen(false)} />
         )}
       </AnimatePresence>
 
