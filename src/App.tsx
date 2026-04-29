@@ -1058,19 +1058,25 @@ export default function App() {
   const handleSaveProperty = async (propData: any) => {
     if (!user) return;
     
-    if (editingProperty) {
-      await propertyService.updateProperty(editingProperty.id, propData);
-    } else {
-      await propertyService.saveProperty({
-        ...propData,
-        ownerEmail: user.email || '',
-        ownerUid: user.uid,
-        isAvailable: propData.isAvailable ?? true,
-        imageUrls: propData.imageUrls?.length > 0 ? propData.imageUrls : [`https://picsum.photos/seed/${Math.random()}/800/600`]
-      });
+    try {
+      if (editingProperty) {
+        await propertyService.updateProperty(editingProperty.id, propData);
+      } else {
+        const docId = await propertyService.saveProperty({
+          ...propData,
+          ownerEmail: user.email || '',
+          ownerUid: user.uid,
+          isAvailable: propData.isAvailable ?? true,
+          imageUrls: propData.imageUrls?.length > 0 ? propData.imageUrls : [`https://picsum.photos/seed/${Math.random()}/800/600`]
+        });
+        if (!docId) throw new Error("Could not save property to database.");
+      }
+      setIsAddModalOpen(false);
+      setEditingProperty(null);
+    } catch (error: any) {
+      console.error("Save failed", error);
+      alert("MASLA: Post save nahi hui. Meharbani karke internet check karein ya dobara koshish karein. Error: " + error.message);
     }
-    setIsAddModalOpen(false);
-    setEditingProperty(null);
   };
 
   const handleDelete = async () => {

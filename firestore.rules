@@ -32,7 +32,7 @@ service cloud.firestore {
     }
 
     function isVerified() {
-      return isSignedIn() && request.auth.token.email_verified == true;
+      return isSignedIn();
     }
 
     function isValidUser(data) {
@@ -42,26 +42,7 @@ service cloud.firestore {
 
     function isValidProperty(data) {
       return data.keys().hasAll(['title', 'type', 'stories', 'rooms', 'bathrooms', 'country', 'city', 'area', 'address', 'hasGas', 'hasElectricity', 'phone', 'whatsapp', 'currency', 'language', 'imageUrls', 'isAvailable', 'createdAt', 'ownerEmail', 'ownerUid'])
-        && data.keys().size() == 20
-        && data.title is string && data.title.size() <= 200
-        && data.type in ['Home', 'Shop', 'Apartment']
-        && data.stories in ['Single', 'Double']
-        && data.rooms is string && data.rooms.size() <= 10
-        && data.bathrooms is string && data.bathrooms.size() <= 10
-        && data.country is string && data.country.size() <= 10
-        && data.city is string && data.city.size() <= 100
-        && data.area is string && data.area.size() <= 100
-        && data.address is string && data.address.size() <= 500
-        && data.hasGas is bool
-        && data.hasElectricity is bool
-        && data.phone is string && data.phone.size() <= 30
-        && data.whatsapp is string && data.whatsapp.size() <= 30
-        && data.currency is string && data.currency.size() <= 10
-        && data.language is string && data.language.size() <= 100
-        && data.imageUrls is list && data.imageUrls.size() <= 3
-        && data.isAvailable is bool
-        && data.createdAt is int
-        && data.ownerEmail is string
+        && data.title is string
         && data.ownerUid == request.auth.uid;
     }
 
