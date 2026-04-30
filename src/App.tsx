@@ -715,10 +715,27 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.country || !formData.city || !formData.phone) {
-      alert("Please fill all required fields");
-      return;
+    
+    const requiredFields = [
+      { key: 'title', label: 'Title' },
+      { key: 'country', label: 'Country' },
+      { key: 'city', label: 'City' },
+      { key: 'area', label: 'Area Name' },
+      { key: 'address', label: 'Address' },
+      { key: 'phone', label: 'Phone' },
+      { key: 'whatsapp', label: 'WhatsApp' },
+      { key: 'rooms', label: 'Rooms' },
+      { key: 'bathrooms', label: 'Bathrooms' }
+    ];
+
+    for (const field of requiredFields) {
+      const val = (formData as any)[field.key];
+      if (!val || val.toString().trim() === '') {
+        alert(`${field.label} missing hai. Meharbani karke tamam fields bharein.`);
+        return;
+      }
     }
+
     onSave(formData);
   };
 
