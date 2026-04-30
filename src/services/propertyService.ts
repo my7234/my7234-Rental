@@ -9,7 +9,10 @@ import {
   where, 
   orderBy,
   getDocFromServer,
-  onSnapshot
+  onSnapshot,
+  arrayUnion,
+  arrayRemove,
+  increment
 } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import { Property } from '../types';
@@ -107,6 +110,30 @@ export const propertyService = {
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, path);
     });
+  },
+
+  incrementView: async (id: string): Promise<void> => {
+    const path = `properties/${id}`;
+    try {
+      const docRef = doc(db, 'properties', id);
+      await updateDoc(docRef, {
+        views: increment(1)
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  toggleLike: async (id: string, userId: string, isLiked: boolean): Promise<void> => {
+    const path = `properties/${id}`;
+    try {
+      const docRef = doc(db, 'properties', id);
+      await updateDoc(docRef, {
+        likes: isLiked ? arrayRemove(userId) : arrayUnion(userId)
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
   },
 
   testConnection: async () => {

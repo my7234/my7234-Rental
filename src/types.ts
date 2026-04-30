@@ -18,11 +18,14 @@ export interface Property {
   whatsapp: string;
   currency: string;
   language: string;
+  price: string;
   imageUrls: string[];
   isAvailable: boolean;
   createdAt: number;
   ownerEmail: string; // To simulate "my properties"
   ownerUid: string;
+  likes?: string[];
+  views?: number;
 }
 
 export interface User {

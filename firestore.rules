@@ -41,7 +41,7 @@ service cloud.firestore {
     }
 
     function isValidProperty(data) {
-      return data.keys().hasAll(['title', 'type', 'stories', 'rooms', 'bathrooms', 'country', 'city', 'area', 'address', 'hasGas', 'hasElectricity', 'phone', 'whatsapp', 'currency', 'language', 'imageUrls', 'isAvailable', 'createdAt', 'ownerEmail', 'ownerUid'])
+      return data.keys().hasAll(['title', 'type', 'stories', 'rooms', 'bathrooms', 'country', 'city', 'area', 'address', 'hasGas', 'hasElectricity', 'phone', 'whatsapp', 'currency', 'language', 'imageUrls', 'isAvailable', 'createdAt', 'ownerEmail', 'ownerUid', 'price'])
         && data.title is string
         && data.ownerUid == request.auth.uid;
     }
@@ -54,10 +54,12 @@ service cloud.firestore {
       allow create: if isVerified() && isValidProperty(incoming());
       
       allow update: if isVerified() 
-        && (isAdmin() || (isOwner(existing().ownerUid)
-        && isValidProperty(incoming())
-        && incoming().ownerUid == existing().ownerUid
-        && incoming().createdAt == existing().createdAt));
+        && (
+          isAdmin() || 
+          (isOwner(existing().ownerUid) && incoming().ownerUid == existing().ownerUid && incoming().createdAt == existing().createdAt) ||
+          (incoming().diff(existing()).affectedKeys().hasOnly(['views'])) ||
+          (incoming().diff(existing()).affectedKeys().hasOnly(['likes']))
+        );
 
       allow delete: if (isVerified() && isOwner(existing().ownerUid) && isValidId(propertyId)) || isAdmin();
     }

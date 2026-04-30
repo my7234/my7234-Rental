@@ -31,7 +31,9 @@ import {
   Smartphone,
   ChevronLeft,
   ChevronRight,
-  Download
+  Download,
+  Heart,
+  Eye
 } from 'lucide-react';
 
 const translations: any = {
@@ -267,7 +269,7 @@ const Select = ({ label, children, ...props }: any) => (
 
 // --- Pages ---
 
-function ProfilePage({ properties, onEdit, onDelete, user, onLogout, onToggleAvailability, t, onImageOpen }: any) {
+function ProfilePage({ properties, onEdit, onDelete, user, onLogout, onToggleAvailability, t, onImageOpen, onLike, onView }: any) {
   return (
     <div className="space-y-8 pb-20">
       <div className="bg-yellow-400 p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
@@ -318,6 +320,9 @@ function ProfilePage({ properties, onEdit, onDelete, user, onLogout, onToggleAva
                 onToggleAvailability={onToggleAvailability}
                 t={t}
                 onImageOpen={onImageOpen}
+                currentUserId={user?.uid}
+                onLike={onLike}
+                onView={onView}
               />
             ))}
           </div>
@@ -452,9 +457,10 @@ function ImageGalleryModal({ images, activeIndex, onClose }: any) {
 
 // --- Cards & Modals ---
 
-function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onToggleAvailability, t, onImageOpen }: any) {
+function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onToggleAvailability, t, onImageOpen, currentUserId, onLike, onView }: any) {
   const [currentImg, setCurrentImg] = useState(0);
   const images = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls : [p.imageUrl || 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&q=80&w=800'];
+  const isLiked = currentUserId && p.likes?.includes(currentUserId);
 
   const handleAction = (e: React.MouseEvent, type: string) => {
     if (!onAction(type)) {
@@ -467,11 +473,12 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onTo
   return (
     <motion.div 
       whileHover={{ y: -5 }}
+      onClick={() => onView && onView(p.id)}
       className="group bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col relative"
     >
       <div 
         className="relative h-48 md:h-72 overflow-hidden cursor-zoom-in"
-        onClick={() => onImageOpen && onImageOpen(images, currentImg)}
+        onClick={(e) => { e.stopPropagation(); onView && onView(p.id); onImageOpen && onImageOpen(images, currentImg); }}
       >
         <img 
           src={images[currentImg]} 
@@ -486,6 +493,34 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onTo
           <span className={`px-5 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl ${p.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}>
             {p.isAvailable ? t.available : t.booked}
           </span>
+        </div>
+
+        <div className="absolute top-6 right-6 flex flex-col gap-2">
+          <a 
+            href={googleMapsUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-red-500 shadow-xl hover:bg-red-500 hover:text-white transition-all active:scale-90"
+          >
+            <motion.div
+              animate={{ y: [0, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            >
+              <MapPin size={28} fill="currentColor" fillOpacity={0.2} />
+            </motion.div>
+          </a>
+
+          <button
+            onClick={(e) => { 
+               e.stopPropagation(); 
+               onLike && onLike(p.id, !!isLiked); 
+            }}
+            className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center shadow-xl transition-all active:scale-90 ${isLiked ? 'bg-red-500 text-white' : 'bg-white/90 backdrop-blur-md text-gray-400 hover:text-red-500'}`}
+          >
+            <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
+            <span className="text-[10px] font-bold">{p.likes?.length || 0}</span>
+          </button>
         </div>
 
         {p.isAvailable === false && (
@@ -507,29 +542,19 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onTo
             ))}
           </div>
         )}
-
-        <div className="absolute top-6 right-6">
-          <a 
-            href={googleMapsUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center text-red-500 shadow-xl hover:bg-red-500 hover:text-white transition-all active:scale-90"
-          >
-            <motion.div
-              animate={{ y: [0, -5, 0] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            >
-              <MapPin size={28} fill="currentColor" fillOpacity={0.2} />
-            </motion.div>
-          </a>
-        </div>
       </div>
 
       <div className="p-5 md:p-8 space-y-4 md:space-y-6 flex-1 flex flex-col">
         <div className="space-y-3 md:space-y-4">
-          <div className="space-y-1">
-             <span className="text-[10px] md:text-sm font-black text-[#8B4513] uppercase tracking-[0.2em]">{p.area}</span>
-             <h4 className="text-2xl md:text-5xl font-black tracking-tighter text-green-600 leading-none group-hover:text-green-700 transition-colors uppercase">{p.city}</h4>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+               <span className="text-[10px] md:text-sm font-black text-[#8B4513] uppercase tracking-[0.2em]">{p.area}</span>
+               <h4 className="text-2xl md:text-5xl font-black tracking-tighter text-green-600 leading-none group-hover:text-green-700 transition-colors uppercase">{p.city}</h4>
+            </div>
+            <div className="flex items-center gap-2 text-gray-400">
+              <Eye size={16} />
+              <span className="text-xs font-black tracking-widest">{p.views || 0}</span>
+            </div>
           </div>
           
           <div className="space-y-1 pt-2 border-t border-gray-50">
@@ -645,7 +670,7 @@ function LocationSelector({ selectedCountry, selectedCity, onCountryChange, onCi
   );
 }
 
-function PropertyModal({ onClose, onSave, editingProperty }: any) {
+function PropertyModal({ onClose, onSave, editingProperty, globalCurrency }: any) {
   const [formData, setFormData] = useState({
     title: editingProperty?.title || '',
     type: (editingProperty?.type || 'Home') as PropertyType,
@@ -660,8 +685,9 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
     hasElectricity: editingProperty?.hasElectricity ?? true,
     phone: editingProperty?.phone || '',
     whatsapp: editingProperty?.whatsapp || '',
-    currency: editingProperty?.currency || '',
+    currency: editingProperty?.currency || globalCurrency || 'PKR',
     language: editingProperty?.language || '',
+    price: editingProperty?.price || '',
     imageUrls: editingProperty?.imageUrls || [] as string[],
     isAvailable: editingProperty?.isAvailable ?? true,
   });
@@ -725,7 +751,8 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
       { key: 'phone', label: 'Phone' },
       { key: 'whatsapp', label: 'WhatsApp' },
       { key: 'rooms', label: 'Rooms' },
-      { key: 'bathrooms', label: 'Bathrooms' }
+      { key: 'bathrooms', label: 'Bathrooms' },
+      { key: 'price', label: 'Rent' }
     ];
 
     for (const field of requiredFields) {
@@ -816,7 +843,15 @@ function PropertyModal({ onClose, onSave, editingProperty }: any) {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input label="Area Name" required value={formData.area} onChange={(e: any) => setFormData({...formData, area: e.target.value})} />
-              <Input label="Currency" value={formData.currency} onChange={(e: any) => setFormData({...formData, currency: e.target.value})} />
+              <div className="flex flex-col gap-1 w-full">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Rent</label>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-black uppercase">{formData.currency}</span>
+                  </div>
+                </div>
+                <Input placeholder="e.g. 25000" type="number" value={formData.price} onChange={(e: any) => setFormData({...formData, price: e.target.value})} />
+              </div>
               <Input label="Language" value={formData.language} onChange={(e: any) => setFormData({...formData, language: e.target.value})} />
             </div>
             <Input label="Address" required value={formData.address} onChange={(e: any) => setFormData({...formData, address: e.target.value})} />
@@ -1107,6 +1142,18 @@ export default function App() {
     await propertyService.updateProperty(id, { isAvailable });
   };
 
+  const handleLike = async (id: string, isLiked: boolean) => {
+    if (!user) {
+      requireAuth(() => {});
+      return;
+    }
+    await propertyService.toggleLike(id, user.uid, isLiked);
+  };
+
+  const handleView = async (id: string) => {
+    await propertyService.incrementView(id);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-yellow-400">
@@ -1128,6 +1175,8 @@ export default function App() {
             onToggleAvailability={handleToggleAvailability}
             t={t}
             onImageOpen={(images: string[], index: number) => setActiveGallery({ images, index })}
+            onLike={handleLike}
+            onView={handleView}
           />
         ) : null;
       case 'privacy':
@@ -1276,6 +1325,9 @@ export default function App() {
                    onToggleAvailability={handleToggleAvailability}
                    t={t}
                    onImageOpen={(images: string[], index: number) => setActiveGallery({ images, index })}
+                   currentUserId={user?.uid}
+                   onLike={handleLike}
+                   onView={handleView}
                  />
                ))}
                {filteredProperties.length === 0 && (
@@ -1521,6 +1573,7 @@ export default function App() {
             onClose={() => {setIsAddModalOpen(false); setEditingProperty(null)}} 
             onSave={handleSaveProperty} 
             editingProperty={editingProperty} 
+            globalCurrency={currency}
           />
         )}
       </AnimatePresence>
