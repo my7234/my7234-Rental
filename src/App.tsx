@@ -490,9 +490,21 @@ function PropertyCard({ property: p, isProfile, onEdit, onDelete, onAction, onTo
           <span className="px-5 py-2 bg-yellow-400 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl">
             {p.type}
           </span>
-          <span className={`px-5 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl ${p.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}>
-            {p.isAvailable ? t.available : t.booked}
-          </span>
+          {isProfile ? (
+            <select
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => onToggleAvailability && onToggleAvailability(p.id, e.target.value === 'Available')}
+              className={`px-5 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl border-none cursor-pointer outline-none appearance-none ${p.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
+              value={p.isAvailable ? 'Available' : 'Booked'}
+            >
+              <option value="Available">{t.available}</option>
+              <option value="Booked">{t.booked}</option>
+            </select>
+          ) : (
+            <span className={`px-5 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl ${p.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}>
+              {p.isAvailable ? t.available : t.booked}
+            </span>
+          )}
         </div>
 
         <div className="absolute top-6 right-6 flex flex-col gap-2">
@@ -1382,7 +1394,7 @@ export default function App() {
             <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
                <div className="hidden md:block text-right">
                   <p className="text-xs font-bold">{user.displayName}</p>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Online</p>
+                  <p className="text-[10px] text-green-500 uppercase tracking-widest font-black">Logged</p>
                </div>
                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-yellow-400 cursor-pointer overflow-hidden bg-gray-100 shadow-sm ring-2 ring-yellow-400/20" onClick={() => setCurrentPage('profile')}>
                  <img src={user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.displayName}`} alt="avatar" className="w-full h-full object-cover" />
